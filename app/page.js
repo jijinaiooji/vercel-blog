@@ -52,6 +52,15 @@ export default function Home() {
     return () => window.removeEventListener('search', handleSearch);
   }, []);
 
+  // Listen for open article event
+  useEffect(() => {
+    const handleOpenArticle = (e) => {
+      setSelectedArticle(e.detail);
+    };
+    window.addEventListener('openArticle', handleOpenArticle);
+    return () => window.removeEventListener('openArticle', handleOpenArticle);
+  }, []);
+
   // Filter articles based on search
   const filteredArticles = useMemo(() => {
     if (!searchQuery.trim()) return articles;
