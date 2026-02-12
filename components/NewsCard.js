@@ -5,8 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { ExternalLink } from 'lucide-react';
 
 function formatTwitterDate(dateStr) {
-  if (!dateStr) return 'Unknown';
+  if (!dateStr) return 'Just now';
+  // If already formatted (like "5m", "2h"), return as-is
+  if (!dateStr.includes('T') && /^\d+[smhd]$/.test(dateStr)) return dateStr;
+  
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return 'Unknown';
+  
   const now = new Date();
   const diffMs = now - date;
   const diffSeconds = Math.floor(diffMs / 1000);
@@ -23,16 +28,17 @@ function formatTwitterDate(dateStr) {
 }
 
 function formatDateFull(dateStr) {
-  if (!dateStr) return 'Unknown';
+  if (!dateStr) return 'Today';
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return 'Today';
   return `${String(date.getUTCDate()).padStart(2, '0')} ${String(date.getUTCMonth() + 1).padStart(2, '0')} ${date.getUTCFullYear()}`;
 }
 
 export default function NewsCard({ article }) {
-  // Handle different date formats from API
-  const dateValue = article.pubDate || article.date || article.isoDate;
-  const displayDate = article.date || (dateValue ? formatTwitterDate(dateValue) : 'Just now');
-  const displayFullDate = article.formattedDate || (dateValue ? formatDateFull(dateValue) : 'Today');
+  // Handle ISO date strings (caching fallback)
+  const rawDate = article.pubDate || article.date || article.isoDate;
+  const displayDate = rawDate ? formatTwitterDate(rawDate) : 'Just now';
+  const displayFullDate = rawDate ? formatDateFull(rawDate) : 'Today';
   
   return (
     <Card className="h-full group bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300">
