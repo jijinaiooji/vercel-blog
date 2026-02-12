@@ -1,6 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from '@/contexts/AuthContext';
-import AuthCallbackHandler from '@/components/AuthCallbackHandler';
 import './globals.css';
 
 export const metadata = {
@@ -15,7 +14,6 @@ export default function RootLayout({ children }) {
       <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>
           {children}
-          <AuthCallbackHandler />
         </AuthProvider>
         <Analytics />
       </body>

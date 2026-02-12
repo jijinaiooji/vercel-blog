@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createElement } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Zap, Mail, Lock, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { createBrowserClient } from '@supabase/ssr'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [mode, setMode] = useState('login') // 'login', 'signup', 'forgot'
+  const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -19,12 +19,23 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [isDark, setIsDark] = useState(true)
 
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
+
   useEffect(() => {
-    // Check theme
     if (document.documentElement.classList.contains('dark')) {
       setIsDark(true)
     }
-  }, [])
+    
+    // Check if already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        router.push('/')
+      }
+    })
+  }, [router, supabase])
 
   const handleSignup = async (e) => {
     e.preventDefault()
@@ -32,21 +43,18 @@ export default function LoginPage() {
     setSuccess('')
     setLoading(true)
 
-    try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      const data = await res.json()
-      
-      if (res.ok) {
-        setSuccess('Account created! Check your email for confirmation.')
-      } else {
-        setError(data.error || 'Signup failed')
-      }
-    } catch (err) {
-      setError('Network error. Please try again.')
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setSuccess('Account created! Check your email for confirmation.')
     }
     setLoading(false)
   }
@@ -56,22 +64,15 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      })
-      const data = await res.json()
-      
-      if (res.ok) {
-        // Force full page reload to pick up session
-        window.location.href = '/?logged_in=true'
-      } else {
-        setError(data.error || 'Login failed')
-      }
-    } catch (err) {
-      setError('Network error. Please try again.')
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      router.push('/')
     }
     setLoading(false)
   }
@@ -82,21 +83,14 @@ export default function LoginPage() {
     setSuccess('')
     setLoading(true)
 
-    try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      })
-      const data = await res.json()
-      
-      if (res.ok) {
-        setSuccess('Check your email for reset link.')
-      } else {
-        setError(data.error || 'Failed to send reset link')
-      }
-    } catch (err) {
-      setError('Network error. Please try again.')
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setSuccess('Check your email for reset link.')
     }
     setLoading(false)
   }
@@ -136,21 +130,28 @@ export default function LoginPage() {
           <CardContent className="pt-8 pb-6">
             {/* Error/Success */}
             {error && (
-              <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 text-sm ${
+              <div className={`mb-4 p-4 rounded-xl ${
                 isDark ? 'bg-red-900/20 text-red-400 border border-red-900/30' : 'bg-red-50 text-red-600 border border-red-200'
               }`}>
-                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                {error}
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  {error}
+                </div>
               </div>
             )}
             {success && (
               <div className={`mb-4 p-4 rounded-xl ${
                 isDark ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-900/30' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
               }`}>
-                <p>{success}</p>
-                <p className="mt-2 text-xs opacity-75">
-                  💡 Tip: Check your spam folder if you don't see the email.
-                </p>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p>{success}</p>
+                    <p className="mt-2 text-xs opacity-75">
+                      💡 Tip: Check spam folder if email doesn't arrive.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
