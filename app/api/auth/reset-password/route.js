@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase-server'
 
 export async function POST(request) {
   try {
-    const { password } = await request.json()
+    const { password, code } = await request.json()
 
     if (!password || password.length < 6) {
       return NextResponse.json(
@@ -12,17 +12,42 @@ export async function POST(request) {
       )
     }
 
-    const supabase = createClient()
-
-    const { error } = await supabase.auth.updateUser({
-      password,
-    })
-
-    if (error) {
+    if (!code) {
       return NextResponse.json(
-        { error: error.message },
+        { error: 'Missing reset code' },
         { status: 400 }
       )
+    }
+
+    const supabase = createClient()
+
+    // Exchange the code for a session and update password
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+    if (error) {
+      // If exchange fails, try updating directly
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
+      })
+      
+      if (updateError) {
+        return NextResponse.json(
+          { error: 'Invalid or expired reset link. Please request a new password reset.' },
+          { status: 400 }
+        )
+      }
+    } else {
+      // Code was valid, update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
+      })
+      
+      if (updateError) {
+        return NextResponse.json(
+          { error: updateError.message },
+          { status: 400 }
+        )
+      }
     }
 
     return NextResponse.json(
@@ -32,7 +57,7 @@ export async function POST(request) {
   } catch (error) {
     console.error('Reset password error:', error)
     return NextResponse.json(
-      { error: 'An error occurred' },
+      { error: 'An error occurred. Please try again.' },
       { status: 500 }
     )
   }
