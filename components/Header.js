@@ -10,6 +10,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [weather, setWeather] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +18,22 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch weather
+  useEffect(() => {
+    async function loadWeather() {
+      try {
+        const res = await fetch('/api/weather');
+        if (res.ok) {
+          const data = await res.json();
+          setWeather(data);
+        }
+      } catch (error) {
+        console.error('Weather fetch failed:', error);
+      }
+    }
+    loadWeather();
   }, []);
 
   useEffect(() => {
@@ -113,6 +130,14 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-2">
+            {/* Weather Display */}
+            {weather && weather.temp !== null && (
+              <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400">
+                <span>{weather.emoji}</span>
+                <span className="font-medium">{weather.temp}°C</span>
+              </div>
+            )}
+
             {/* Theme Toggle - Desktop */}
             <button
               onClick={() => setIsDark(!isDark)}
