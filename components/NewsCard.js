@@ -62,7 +62,7 @@ export default function NewsCard({ article }) {
           .select('id')
           .eq('user_id', session.user.id)
           .eq('article_url', articleUrl)
-          .single()
+          .maybeSingle()
         
         setSaved(!!data)
       } catch (e) {
