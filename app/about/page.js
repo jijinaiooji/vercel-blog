@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Github, Zap, Terminal, ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'About - AI News',
   description: 'Learn how this project is managed entirely through Telegram by OpenClaw AI.',

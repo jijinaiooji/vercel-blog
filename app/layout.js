@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { AuthProvider } from '@/contexts/AuthContext'
  
 export const metadata = {
   title: 'AI News - Latest Artificial Intelligence News & Updates',
@@ -28,7 +29,9 @@ export default function RootLayout({ children }) {
         <meta name="theme-color" content="#18181b" />
       </head>
       <body className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )
