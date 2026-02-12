@@ -52,7 +52,11 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes('rate') || error.message.includes('429') || error.message.includes('limit')) {
+        setError('High demand! Please wait a few seconds and try again.')
+      } else {
+        setError(error.message)
+      }
     } else {
       setSuccess('Account created! Check your email for confirmation.')
     }
@@ -70,7 +74,11 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes('rate') || error.message.includes('429') || error.message.includes('limit')) {
+        setError('High demand! Please wait a few seconds and try again.')
+      } else {
+        setError(error.message)
+      }
     } else {
       router.push('/')
     }
@@ -88,7 +96,11 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes('rate') || error.message.includes('429') || error.message.includes('limit')) {
+        setError('High demand! Please wait a few seconds and try again.')
+      } else {
+        setError(error.message)
+      }
     } else {
       setSuccess('Check your email for reset link.')
     }

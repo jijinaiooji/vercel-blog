@@ -31,7 +31,11 @@ export default function AuthCallback() {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (error) {
-          setError(error.message)
+          if (error.message.includes('rate') || error.message.includes('429') || error.message.includes('limit')) {
+            setError('High demand! Please wait a few seconds and try again.')
+          } else {
+            setError(error.message)
+          }
         } else {
           setStatus('Confirmed! Refreshing...')
           setTimeout(() => {
