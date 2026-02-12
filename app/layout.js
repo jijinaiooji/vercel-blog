@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import './globals.css'
  
 export const metadata = {
   title: 'AI News - Latest Artificial Intelligence News & Updates',
