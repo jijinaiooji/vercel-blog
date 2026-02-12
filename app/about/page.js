@@ -1,8 +1,7 @@
-import Header from '@/components/Header';
+import SimpleHeader from '@/components/SimpleHeader';
 import Footer from '@/components/Footer';
 import { Badge } from '@/components/ui/badge';
-import { Github, Zap, Terminal, ArrowRight, Sparkles } from 'lucide-react';
-import Link from 'next/link';
+import { Github, Zap, Terminal, Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +39,7 @@ const steps = [
 ];
 
 const techStack = [
-  { name: 'Next.js 14', desc: 'React framework' },
+  { name: 'Next.js 15', desc: 'React framework' },
   { name: 'Vercel', desc: 'Hosting & serverless' },
   { name: 'GitHub Actions', desc: 'CI/CD automation' },
   { name: 'OpenClaw', desc: 'AI-powered automation' },
@@ -56,15 +55,15 @@ const features = [
   { title: 'Dark/Light theme', desc: 'Persistent theme preference' },
   { title: 'Search & filter', desc: 'Find articles instantly' },
   { title: 'Auto-updating news', desc: 'RSS feeds refresh every 12 hours' },
-  { title: 'Zero manual deployment', desc: 'Push to GitHub triggers Vercel' },
-  { title: 'Serverless API', desc: 'News fetched on-demand, cached at edge' },
+  { title: 'Save articles', desc: 'Bookmark articles for later' },
+  { title: 'Share articles', desc: 'Share on X, Facebook, Mastodon' },
   { title: 'Fully open-source', desc: 'Code on GitHub, free to fork' },
 ];
 
 export default function About() {
   return (
     <>
-      <Header />
+      <SimpleHeader />
       
       <main className="min-h-screen pt-20">
         {/* Hero */}
@@ -98,7 +97,7 @@ export default function About() {
             </h2>
             
             <div className="space-y-4">
-              {steps.map((step, index) => (
+              {steps.map((step) => (
                 <div 
                   key={step.num}
                   className="flex gap-4 p-4 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
