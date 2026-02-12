@@ -17,7 +17,6 @@ export default function ArticleDrawer({ article, onClose }) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
 
-  // Get article image from RSS data
   const articleImage = article?.image || article?.thumbnail || ''
 
   useEffect(() => {
@@ -53,17 +52,18 @@ export default function ArticleDrawer({ article, onClose }) {
 
   // Fetch content
   useEffect(() => {
-    if (!article?.url) return
+    if (!article?.url && !article?.link) return
 
     const timer = setTimeout(() => {
       if (loading) {
         setError('Taking too long. Tap to open original site.')
       }
-    }, 5000)
+    }, 6000)
 
     const fetchContent = async () => {
       try {
-        const res = await fetch(`/api/article?url=${encodeURIComponent(article.url)}`)
+        const articleUrl = article.url || article.link
+        const res = await fetch(`/api/article?url=${encodeURIComponent(articleUrl)}`)
         const data = await res.json()
         if (res.ok && (data.content || data.error)) {
           setContent(data)
@@ -121,17 +121,46 @@ export default function ArticleDrawer({ article, onClose }) {
     }
   }
 
+  // Parse content into paragraphs
+  const renderContent = (text) => {
+    if (!text) return null
+    
+    const lines = text.split('\n\n')
+    return lines.map((line, i) => {
+      line = line.trim()
+      if (!line) return null
+
+      // Bold text
+      if (line.startsWith('**') && line.endsWith('**')) {
+        return <p key={i} className={`font-bold mb-3 ${isDark ? 'text-white' : 'text-zinc-900'}`}>{line.replace(/\*\*/g, '')}</p>
+      }
+
+      // Heading
+      if (line.startsWith('### ')) {
+        return <h3 key={i} className={`text-lg font-bold mt-5 mb-2 ${isDark ? 'text-white' : 'text-zinc-900'}`}>{line.replace('### ', '')}</h3>
+      }
+
+      // Quote
+      if (line.startsWith('> ')) {
+        return <blockquote key={i} className={`border-l-4 border-yellow-500 pl-4 my-4 italic ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>{line.replace('> ', '')}</blockquote>
+      }
+
+      // Regular paragraph
+      return <p key={i} className={`mb-3 leading-relaxed ${isDark ? 'text-zinc-300' : 'text-zinc-700'}`}>{line}</p>
+    })
+  }
+
   if (!article) return null
 
   return (
     <>
       <div className="fixed inset-0 bg-black/60 z-40" onClick={onClose} />
       
-      <div className={`fixed top-0 right-0 h-full w-full max-w-xl z-50 shadow-2xl ${
+      <div className={`fixed top-0 right-0 h-full w-full max-w-xl z-50 shadow-2xl overflow-hidden flex flex-col ${
         isDark ? 'bg-zinc-950' : 'bg-white'
       }`}>
         {/* Header */}
-        <div className={`flex items-center justify-between px-4 py-3 border-b ${
+        <div className={`flex items-center justify-between px-4 py-3 border-b flex-shrink-0 ${
           isDark ? 'border-zinc-800' : 'border-zinc-200'
         }`}>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
@@ -145,23 +174,23 @@ export default function ArticleDrawer({ article, onClose }) {
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 
                 saved ? <Bookmark className="w-5 h-5 fill-current" /> : <Bookmark className="w-5 h-5" />}
             </button>
-            <a href={article.url} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
+            <a href={article.url || article.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800">
               <Globe className="w-5 h-5" />
             </a>
           </div>
         </div>
 
         {/* Content */}
-        <div className="h-[calc(100%-56px)] overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-64">
+            <div className="flex flex-col items-center justify-center h-full">
               <Loader2 className="w-8 h-8 animate-spin text-zinc-400 mb-4" />
               <p className="text-zinc-500">Loading...</p>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center px-4">
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
               <p className={`mb-4 ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>{error}</p>
-              <a href={article.url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${
+              <a href={article.url || article.link} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${
                 isDark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'
               }`}>
                 <ExternalLink className="w-4 h-4" />
@@ -187,28 +216,35 @@ export default function ArticleDrawer({ article, onClose }) {
               </h1>
               
               {(content.author || content.date) && (
-                <div className={`flex gap-3 mb-4 text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                <div className={`flex gap-3 mb-6 text-sm ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>
                   {content.author && <span>By {content.author}</span>}
                   {content.author && content.date && <span>•</span>}
                   {content.date && <span>{content.date}</span>}
                 </div>
               )}
 
-              <div className={`prose prose-sm ${isDark ? 'prose-invert' : ''}`}>
-                {content.content.split('\n').filter(p => p.trim()).map((p, i) => {
-                  if (p.startsWith('### ')) {
-                    return <h3 key={i} className="text-lg font-bold mt-4">{p.replace('### ', '')}</h3>
-                  }
-                  return <p key={i} className="my-2 leading-relaxed">{p}</p>
-                })}
+              {/* Formatted Content */}
+              <div className="prose prose-sm max-w-none">
+                {renderContent(content.content)}
               </div>
 
+              {/* Saved indicator */}
               {saved && (
                 <div className="mt-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg flex items-center gap-2 text-yellow-700 dark:text-yellow-400">
                   <Check className="w-4 h-4" />
                   <span className="text-sm font-medium">Saved</span>
                 </div>
               )}
+
+              {/* Read original */}
+              <div className="mt-8 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <a href={article.url || article.link} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-2 text-sm ${
+                  isDark ? 'text-zinc-400 hover:text-white' : 'text-zinc-600 hover:text-zinc-900'
+                }`}>
+                  <ExternalLink className="w-4 h-4" />
+                  Continue reading on original site
+                </a>
+              </div>
             </div>
           ) : null}
         </div>
