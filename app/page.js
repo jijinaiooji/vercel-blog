@@ -224,7 +224,7 @@ function HomePage() {
                 {renderSection('Yesterday', groupedArticles['Yesterday'], 'text-purple-600')}
                 {renderSection('This Week', groupedArticles['This Week'], 'text-orange-600')}
                 {renderSection('Last Week', groupedArticles['Last Week'], 'text-zinc-600')}
-                {renderSection('Earlier', groupedArticles['Earlier'], 'text-zinc-500')}
+                {}
                 {renderPagination()}
               </>
             ) : (
