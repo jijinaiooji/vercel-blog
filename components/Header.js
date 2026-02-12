@@ -2,16 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, Sun, Moon, Zap, Search } from 'lucide-react';
+import { Menu, X, Sun, Moon, Zap, Search, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Header() {
+  const { user, loading: authLoading, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [weather, setWeather] = useState(null);
-  const [weatherLoading, setWeatherLoading] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,18 +26,13 @@ export default function Header() {
   useEffect(() => {
     async function loadWeather() {
       try {
-        console.log('Fetching weather...');
         const res = await fetch('/api/weather');
-        console.log('Weather API response:', res.status);
         if (res.ok) {
           const data = await res.json();
-          console.log('Weather data:', data);
           setWeather(data);
         }
       } catch (error) {
         console.error('Weather fetch failed:', error);
-      } finally {
-        setWeatherLoading(false);
       }
     }
     loadWeather();
@@ -69,10 +65,14 @@ export default function Header() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Dispatch custom event for search
       window.dispatchEvent(new CustomEvent('search', { detail: searchQuery }));
       setIsOpen(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setIsOpen(false);
   };
 
   const navLinks = [
@@ -136,7 +136,7 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-2">
-            {/* Weather Display - Always show something */}
+            {/* Weather Display */}
             <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400">
               <span>{weather ? weather.emoji : '🌤️'}</span>
               <span className="font-medium">{weather && weather.temp != null ? `${weather.temp}°C` : '...'}</span>
@@ -144,6 +144,33 @@ export default function Header() {
                 <span className="text-zinc-400">• {weather.location.city}</span>
               )}
             </div>
+
+            {/* User Menu or Login */}
+            {!authLoading && (
+              user ? (
+                <div className="hidden md:flex items-center gap-2 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                  <User className="w-4 h-4 text-zinc-400" />
+                  <span className="text-xs text-zinc-600 dark:text-zinc-400 max-w-[100px] truncate">
+                    {user.email}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                    aria-label="Sign out"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-zinc-500" />
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  Sign In
+                </Link>
+              )
+            )}
 
             {/* Theme Toggle - Desktop */}
             <button
@@ -204,6 +231,36 @@ export default function Header() {
                 <span className="text-zinc-400">• {weather.location.city}</span>
               )}
             </div>
+
+            {/* User - Mobile */}
+            {!authLoading && (
+              user ? (
+                <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-zinc-400" />
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400 truncate max-w-[200px]">
+                      {user.email}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  Sign In
+                </Link>
+              )
+            )}
 
             {/* Theme Toggle - Mobile */}
             <button
