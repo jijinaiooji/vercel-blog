@@ -1,5 +1,33 @@
 import moment from 'moment';
 
+function formatTwitterDate(dateStr) {
+  const date = moment(dateStr);
+  const now = moment();
+  const diffSeconds = now.diff(date, 'seconds');
+  const diffMinutes = now.diff(date, 'minutes');
+  const diffHours = now.diff(date, 'hours');
+  const diffDays = now.diff(date, 'days');
+
+  if (diffSeconds < 60) {
+    return `${diffSeconds}s`;
+  }
+  if (diffMinutes < 60) {
+    return `${diffMinutes}m`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours}h`;
+  }
+  if (diffDays < 365) {
+    return `${diffDays}d`;
+  }
+  
+  return date.format('MMM D, YYYY');
+}
+
+function formatDateFull(dateStr) {
+  return moment(dateStr).format('DD MM YYYY');
+}
+
 const RSS_FEEDS = [
   { name: 'OpenAI', url: 'https://openai.com/blog/rss.xml', color: '#10a37f' },
   { name: 'MIT CSAIL', url: 'https://www.csail.mit.edu/rss/news/all.xml', color: '#a31f34' },
@@ -29,6 +57,7 @@ export async function fetchAINews() {
           source: feed.name,
           sourceColor: feed.color,
           date: formatTwitterDate(item.pubDate),
+          formattedDate: formatDateFull(item.pubDate),
           pubDate: item.pubDate,
         });
       }
@@ -72,28 +101,4 @@ function parseRSS(xml) {
   }
   
   return items;
-}
-
-function formatTwitterDate(dateStr) {
-  const date = moment(dateStr);
-  const now = moment();
-  const diffSeconds = now.diff(date, 'seconds');
-  const diffMinutes = now.diff(date, 'minutes');
-  const diffHours = now.diff(date, 'hours');
-  const diffDays = now.diff(date, 'days');
-
-  if (diffSeconds < 60) {
-    return `${diffSeconds}s`;
-  }
-  if (diffMinutes < 60) {
-    return `${diffMinutes}m`;
-  }
-  if (diffHours < 24) {
-    return `${diffHours}h`;
-  }
-  if (diffDays < 365) {
-    return `${diffDays}d`;
-  }
-  
-  return date.format('MMM D, YYYY');
 }

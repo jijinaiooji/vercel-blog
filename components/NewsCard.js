@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Clock } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
 export default function NewsCard({ article }) {
   return (
@@ -16,9 +16,10 @@ export default function NewsCard({ article }) {
           >
             {article.source}
           </Badge>
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{article.date}</span>
+          <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+            <span className="font-medium">{article.date}</span>
+            <span className="text-zinc-300 dark:text-zinc-600">•</span>
+            <span>{article.formattedDate}</span>
           </div>
         </div>
 
