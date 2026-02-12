@@ -6,7 +6,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/NewsCard';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 const ITEMS_PER_PAGE = 12;
@@ -49,12 +49,10 @@ function HomePage() {
     return () => window.removeEventListener('search', handleSearch);
   }, []);
 
-  // Get all articles sorted by date
   const sortedArticles = useMemo(() => {
     return [...articles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   }, [articles]);
 
-  // Filter articles based on search
   const filteredArticles = useMemo(() => {
     if (!searchQuery.trim()) return sortedArticles;
     const query = searchQuery.toLowerCase();
@@ -65,7 +63,6 @@ function HomePage() {
     );
   }, [sortedArticles, searchQuery]);
 
-  // Paginate
   const paginatedArticles = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredArticles.slice(start, start + ITEMS_PER_PAGE);
@@ -82,7 +79,6 @@ function HomePage() {
     setSearchQuery('');
   };
 
-  // Group current page articles by date
   const groupedArticles = useMemo(() => {
     const groups = { today: [], yesterday: [], thisWeek: [], earlier: [] };
     const now = new Date();
@@ -127,17 +123,15 @@ function HomePage() {
     if (totalPages <= 1) return null;
     
     return (
-      <div className="flex items-center justify-center gap-2 mt-10 flex-wrap">
-        {/* Previous */}
+      <div className="flex items-center justify-center gap-2 mt-10">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
-          Prev
+          <ChevronLeft className="w-4 h-4" />
         </button>
         
-        {/* Page numbers - show all */}
         <div className="flex items-center gap-1">
           {Array.from({ length: totalPages }, (_, i) => {
             const pageNum = i + 1;
@@ -157,13 +151,12 @@ function HomePage() {
           })}
         </div>
         
-        {/* Next */}
         <button
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
-          Next
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     );
