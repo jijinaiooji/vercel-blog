@@ -10,7 +10,7 @@ export default function Header() {
       <nav className={styles.nav}>
         <a href="/" className={styles.navLink}>Latest</a>
         <a href="#news" className={styles.navLink}>News</a>
-        <a href="#" className={styles.navLink}>About</a>
+        <a href="/about" className={styles.navLink}>About</a>
       </nav>
       <div className={styles.status}>
         <span className={styles.statusDot}></span>
