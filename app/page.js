@@ -9,7 +9,7 @@ import NewsCard from '@/components/NewsCard';
 import { Loader2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AuthProvider } from '@/contexts/AuthContext';
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 12;
 
 function HomePage() {
   const [articles, setArticles] = useState([]);
