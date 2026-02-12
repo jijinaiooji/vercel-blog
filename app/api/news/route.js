@@ -1,7 +1,7 @@
 import { fetchAINews } from '@/lib/news';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 43200; // 12 hours
+export const revalidate = 60; // 1 minute - force refresh
 
 export async function GET() {
   try {
