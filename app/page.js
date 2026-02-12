@@ -49,10 +49,12 @@ function HomePage() {
     return () => window.removeEventListener('search', handleSearch);
   }, []);
 
+  // Sort by date
   const sortedArticles = useMemo(() => {
     return [...articles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   }, [articles]);
 
+  // Filter
   const filteredArticles = useMemo(() => {
     if (!searchQuery.trim()) return sortedArticles;
     const query = searchQuery.toLowerCase();
@@ -63,6 +65,7 @@ function HomePage() {
     );
   }, [sortedArticles, searchQuery]);
 
+  // Paginate
   const paginatedArticles = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredArticles.slice(start, start + ITEMS_PER_PAGE);
@@ -71,7 +74,7 @@ function HomePage() {
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE);
 
   const goToPage = (page) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    setCurrentPage(Math.max(1, Math.min(page, totalPages));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -79,36 +82,38 @@ function HomePage() {
     setSearchQuery('');
   };
 
+  // Group by date for display
   const groupedArticles = useMemo(() => {
-    const groups = { today: [], yesterday: [], thisWeek: [] };
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const weekAgo = new Date(today);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-
+    const groups = {};
     paginatedArticles.forEach(article => {
       const pubDate = new Date(article.pubDate);
-      if (pubDate >= today) groups.today.push(article);
-      else if (pubDate >= yesterday) groups.yesterday.push(article);
-      else if (pubDate >= weekAgo) groups.thisWeek.push(article);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      let label;
+      if (pubDate >= today) label = 'Today';
+      else if (pubDate >= yesterday) label = 'Yesterday';
+      else {
+        const daysAgo = Math.floor((today - pubDate) / (1000 * 60 * 60 * 24));
+        if (daysAgo <= 7) label = 'This Week';
+        else if (daysAgo <= 14) label = 'Last Week';
+        else label = 'Earlier';
+      }
+      
+      if (!groups[label]) groups[label] = [];
+      groups[label].push(article);
     });
-
     return groups;
   }, [paginatedArticles]);
 
   const renderSection = (title, articles, colorClass) => {
-    if (articles.length === 0) return null;
+    if (!articles || articles.length === 0) return null;
     
     return (
       <section className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className={`text-base font-bold ${colorClass}`}>{title}</h2>
-          <span className="text-xs text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
-            {articles.length}
-          </span>
-        </div>
+        <h2 className={`text-lg font-bold ${colorClass} mb-4`}>{title}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {articles.map((article, index) => (
             <NewsCard key={index} article={article} />
@@ -142,16 +147,14 @@ function HomePage() {
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
           Prev
         </button>
         
         <div className="flex items-center gap-1">
           {getPageNumbers().map((pageNum, idx) => {
-            if (pageNum === -1) {
-              return <span key={`ellipsis-${idx}`} className="px-2 text-zinc-400">...</span>;
-            }
+            if (pageNum === -1) return <span key={`ellipsis-${idx}`} className="px-2 text-zinc-400">...</span>;
             return (
               <button
                 key={pageNum}
@@ -159,7 +162,7 @@ function HomePage() {
                 className={`w-8 h-8 rounded-lg text-sm font-medium ${
                   currentPage === pageNum
                     ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
               >
                 {pageNum}
@@ -171,7 +174,7 @@ function HomePage() {
         <button
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
           Next
         </button>
@@ -202,7 +205,7 @@ function HomePage() {
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-zinc-500">
-                  {filteredArticles.length} result{filteredArticles.length !== 1 ? 's' : ''} for "{searchQuery}"
+                  {filteredArticles.length} results for "{searchQuery}"
                 </p>
                 <button onClick={clearSearch} className="text-sm text-blue-600 hover:underline">
                   Clear
@@ -221,9 +224,11 @@ function HomePage() {
               </div>
             ) : filteredArticles.length > 0 ? (
               <>
-                {renderSection('Today', groupedArticles.today, 'text-blue-600')}
-                {renderSection('Yesterday', groupedArticles.yesterday, 'text-purple-600')}
-                {renderSection('This Week', groupedArticles.thisWeek, 'text-orange-600')}
+                {renderSection('Today', groupedArticles['Today'], 'text-blue-600')}
+                {renderSection('Yesterday', groupedArticles['Yesterday'], 'text-purple-600')}
+                {renderSection('This Week', groupedArticles['This Week'], 'text-orange-600')}
+                {renderSection('Last Week', groupedArticles['Last Week'], 'text-zinc-600')}
+                {renderSection('Earlier', groupedArticles['Earlier'], 'text-zinc-500')}
                 {renderPagination()}
               </>
             ) : (
