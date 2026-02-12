@@ -151,13 +151,6 @@ export default function NewsCard({ article }) {
     setShowShare(false)
   }
 
-  const copyLink = async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    await navigator.clipboard.writeText(articleUrl)
-    setShowShare(false)
-  }
-
   const hasImage = !!article.image;
 
   return (
@@ -180,54 +173,6 @@ export default function NewsCard({ article }) {
             />
           </div>
         )}
-        
-        {/* Actions */}
-        <div className="absolute top-3 right-3 z-10 flex gap-1">
-          {/* Share Button */}
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(!showShare); }}
-            className={`p-2 rounded-full bg-white/90 dark:bg-zinc-900/90 text-zinc-600 dark:text-zinc-400 hover:text-blue-500 shadow-md transition-all ${showShare ? 'text-blue-500' : ''}`}
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
-          
-          {/* Share Options */}
-          {showShare && (
-            <div className="flex gap-1 animate-in fade-in slide-in-from-right-2 duration-200" onClick={(e) => e.preventDefault()}>
-              <button onClick={shareTwitter} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-blue-400 hover:bg-blue-50">
-                <Twitter className="w-4 h-4" />
-              </button>
-              <button onClick={shareFacebook} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-blue-600 hover:bg-blue-50">
-                <Facebook className="w-4 h-4" />
-              </button>
-              <button onClick={shareLinkedIn} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-blue-700 hover:bg-blue-50">
-                <Linkedin className="w-4 h-4" />
-              </button>
-              <button onClick={shareMastodon} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-purple-600 hover:bg-purple-50">
-                <MastodonIcon className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-        </div>
-        
-        {/* Bookmark Button */}
-        <button
-          onClick={handleSave}
-          className={`absolute z-10 p-2 rounded-full transition-all ${
-            hasImage ? 'top-3 left-3' : 'top-3 left-3'
-          } ${
-            saved 
-              ? 'bg-yellow-500 text-white' 
-              : 'bg-white/90 dark:bg-zinc-900/90 text-zinc-600 dark:text-zinc-400 hover:bg-yellow-500 hover:text-white shadow-md'
-          }`}
-          disabled={loading}
-        >
-          {loading ? (
-            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
-          )}
-        </button>
         
         <CardContent className="p-5 space-y-4">
           {/* Header */}
@@ -255,10 +200,68 @@ export default function NewsCard({ article }) {
             {article.description}
           </p>
 
-          {/* Footer */}
-          <div className="pt-2 flex items-center gap-2 text-xs text-zinc-400">
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>{article.source}</span>
+          {/* Footer with actions */}
+          <div className="pt-2 flex items-center justify-between">
+            <a 
+              href={articleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-blue-500 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>{article.source}</span>
+            </a>
+            
+            {/* Actions */}
+            <div className="flex items-center gap-1">
+              {/* Share Button */}
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(!showShare); }}
+                className={`p-1.5 rounded-lg transition-all ${
+                  showShare 
+                    ? 'bg-blue-500 text-white' 
+                    : 'text-zinc-400 hover:text-blue-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                }`}
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+              
+              {/* Share Options */}
+              {showShare && (
+                <div className="flex gap-1 animate-in fade-in duration-200">
+                  <button onClick={shareTwitter} className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">
+                    <Twitter className="w-4 h-4" />
+                  </button>
+                  <button onClick={shareFacebook} className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30">
+                    <Facebook className="w-4 h-4" />
+                  </button>
+                  <button onClick={shareLinkedIn} className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/30">
+                    <Linkedin className="w-4 h-4" />
+                  </button>
+                  <button onClick={shareMastodon} className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30">
+                    <MastodonIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+              
+              {/* Bookmark Button */}
+              <button
+                onClick={handleSave}
+                disabled={loading}
+                className={`p-1.5 rounded-lg transition-all ${
+                  saved 
+                    ? 'text-yellow-500' 
+                    : 'text-zinc-400 hover:text-yellow-500'
+                }`}
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
+                )}
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>
