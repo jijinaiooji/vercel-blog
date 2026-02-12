@@ -80,9 +80,9 @@ export default function SavedDrawer({ isOpen, onClose }) {
 
   const handleRead = (article) => {
     window.dispatchEvent(new CustomEvent('openArticle', { detail: {
-      url: article.article_url,
-      title: article.article_title,
-      source: article.article_source
+      url: article.article_url || article.url,
+      title: article.article_title || article.title,
+      source: article.article_source || article.source
     }}))
     onClose()
   }

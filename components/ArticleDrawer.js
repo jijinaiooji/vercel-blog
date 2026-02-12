@@ -28,7 +28,7 @@ export default function ArticleDrawer({ article, onClose }) {
 
   // Check if saved
   useEffect(() => {
-    if (!article?.url) return
+    if (!article?.url && !article?.link) return
     
     const checkSaved = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -37,11 +37,12 @@ export default function ArticleDrawer({ article, onClose }) {
         return
       }
       
+      const articleUrl = article.url || article.link
       const { data: savedArticle } = await supabase
         .from('saved_articles')
         .select('id')
         .eq('user_id', session.user.id)
-        .eq('article_url', article.url)
+        .eq('article_url', articleUrl)
         .single()
       
       setSaved(!!savedArticle)
@@ -93,13 +94,19 @@ export default function ArticleDrawer({ article, onClose }) {
         return
       }
 
+      const articleUrl = article.url || article.link
+      if (!articleUrl) {
+        setSaving(false)
+        return
+      }
+
       if (saved) {
-        await supabase.from('saved_articles').delete().eq('user_id', session.user.id).eq('article_url', article.url)
+        await supabase.from('saved_articles').delete().eq('user_id', session.user.id).eq('article_url', articleUrl)
         setSaved(false)
       } else {
         await supabase.from('saved_articles').insert({
           user_id: session.user.id,
-          article_url: article.url,
+          article_url: articleUrl,
           article_title: article.title,
           article_source: article.source,
           article_date: article.pubDate,
