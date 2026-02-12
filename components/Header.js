@@ -69,9 +69,17 @@ export default function Header() {
     }
 
     fetchSavedCount()
-    // Refresh when saved drawer closes
-    if (savedOpen === false) {
-      fetchSavedCount()
+    
+    // Refresh when window gains focus (user returns from saved article)
+    window.addEventListener('focus', fetchSavedCount)
+    
+    // Listen for save event from cards
+    const handleSaved = () => fetchSavedCount()
+    window.addEventListener('articleSaved', handleSaved)
+    
+    return () => {
+      window.removeEventListener('focus', fetchSavedCount)
+      window.removeEventListener('articleSaved', handleSaved)
     }
   }, [savedOpen]);
 

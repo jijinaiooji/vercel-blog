@@ -102,6 +102,7 @@ export default function NewsCard({ article }) {
       if (saved) {
         await supabase.from('saved_articles').delete().eq('user_id', session.user.id).eq('article_url', articleUrl)
         setSaved(false)
+        window.dispatchEvent(new CustomEvent('articleSaved'))
       } else {
         await supabase.from('saved_articles').insert({
           user_id: session.user.id,
@@ -112,6 +113,7 @@ export default function NewsCard({ article }) {
           saved_at: new Date().toISOString()
         })
         setSaved(true)
+        window.dispatchEvent(new CustomEvent('articleSaved'))
       }
     } catch (err) {
       console.error('Save error:', err)
