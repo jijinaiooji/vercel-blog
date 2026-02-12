@@ -6,7 +6,6 @@ import { useEffect, useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/NewsCard';
-import { DailyQuote } from '@/components/DailyQuote';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 const ITEMS_PER_PAGE = 12;
@@ -185,7 +184,7 @@ function HomePage() {
       <main className="min-h-screen pt-16">
         <section className="py-12 sm:py-16 px-4 sm:px-6">
           <div className="max-w-5xl mx-auto text-center">
-            <DailyQuote />
+            
             
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-3">
               Latest <span className="text-blue-600">AI News</span>
