@@ -122,19 +122,47 @@ function HomePage() {
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     
+    // Show limited pages: first 2, current, last 2
+    const getPageNumbers = () => {
+      const pages = [];
+      if (totalPages <= 5) {
+        // Show all if 5 or less
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+      } else {
+        // Always show first 2
+        pages.push(1, 2);
+        
+        // Show current page and neighbors
+        const start = Math.max(3, currentPage - 1);
+        const end = Math.min(totalPages - 2, currentPage + 1);
+        
+        if (start > 3) pages.push(-1); // Ellipsis
+        
+        for (let i = start; i <= end; i++) pages.push(i);
+        
+        if (end < totalPages - 2) pages.push(-1); // Ellipsis
+        
+        // Always show last 2
+        pages.push(totalPages - 1, totalPages);
+      }
+      return pages;
+    };
+
     return (
       <div className="flex items-center justify-center gap-2 mt-10">
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
-          <ChevronLeft className="w-4 h-4" />
+          Prev
         </button>
         
         <div className="flex items-center gap-1">
-          {Array.from({ length: totalPages }, (_, i) => {
-            const pageNum = i + 1;
+          {getPageNumbers().map((pageNum, idx) => {
+            if (pageNum === -1) {
+              return <span key={`ellipsis-${idx}`} className="px-2 text-zinc-400">...</span>;
+            }
             return (
               <button
                 key={pageNum}
@@ -154,9 +182,9 @@ function HomePage() {
         <button
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
-          <ChevronRight className="w-4 h-4" />
+          Next
         </button>
       </div>
     );
