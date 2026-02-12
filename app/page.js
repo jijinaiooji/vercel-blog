@@ -6,7 +6,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/NewsCard';
-import { Loader2, Sparkles } from 'lucide-react';
+import { DailyQuote } from '@/components/DailyQuote';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 const ITEMS_PER_PAGE = 12;
@@ -185,10 +185,7 @@ function HomePage() {
       <main className="min-h-screen pt-16">
         <section className="py-12 sm:py-16 px-4 sm:px-6">
           <div className="max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-yellow-500 dark:text-yellow-400 mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>AI News</span>
-            </div>
+            <DailyQuote />
             
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-3">
               Latest <span className="text-blue-600">AI News</span>
