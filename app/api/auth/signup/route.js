@@ -18,7 +18,7 @@ export async function POST(request) {
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/callback`,
+        emailRedirectTo: 'https://vercel-blog-fjca7kc3a-jijinaios-projects.vercel.app/auth/callback',
       },
     })
 

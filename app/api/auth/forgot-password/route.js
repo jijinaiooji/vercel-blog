@@ -15,7 +15,7 @@ export async function POST(request) {
     const supabase = createClient()
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/reset`,
+      redirectTo: 'https://vercel-blog-fjca7kc3a-jijinaios-projects.vercel.app/auth/reset',
     })
 
     if (error) {
