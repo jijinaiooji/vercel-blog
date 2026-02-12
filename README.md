@@ -4,7 +4,7 @@ A modern, beautifully designed AI news aggregator — built with Next.js, deploy
 
 ## ✨ Features
 
-- **Auto-updating** - Fetches latest AI news every 5 minutes
+- **Auto-updating** - Fetches latest AI news every 12 hours
 - **Modern UI** - Figma-inspired design with smooth animations
 - **Responsive** - Looks great on desktop and mobile
 - **Analytics** - Built-in Vercel Analytics
@@ -20,7 +20,7 @@ vercel-blog/
 │   │   ├── Header.module.css
 │   │   ├── Footer.js      # Site footer
 │   │   ├── Footer.module.css
-│   │   ├── NewsCard.js    # News article card
+│   │   ├── NewsCard.js   # News article card
 │   │   └── NewsCard.module.css
 │   ├── lib/               # Utility functions
 │   │   └── news.js        # RSS fetcher & parser

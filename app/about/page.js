@@ -1,129 +1,117 @@
+'use client';
+
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import styles from './about.module.css';
+
 export const metadata = {
-  title: 'About - AI News Blog',
-  description: 'How this fully automated blog was created and managed entirely via Telegram using OpenClaw AI',
+  title: 'About - AI News',
+  description: 'Learn how this project is managed entirely through Telegram by OpenClaw AI.',
 };
 
 export default function About() {
-  const prompts = [
-    {
-      date: '2026-02-12',
-      action: 'Created GitHub repo & deployed blog',
-      details: [
-        '• GitHub repo: jijinaiooji/vercel-blog',
-        '• Connected GitHub token via Telegram',
-        '• Initialized Next.js blog with RSS feeds',
-        '• Linked GitHub Actions for auto-deploy',
-      ]
-    },
-    {
-      date: '2026-02-12',
-      action: 'AI News Blog Features',
-      details: [
-        '• Auto-fetches from OpenAI, MIT, Google AI',
-        '• Auto-updates every 5 minutes',
-        '• Removes duplicates, sorts by date',
-        '• Modern Figma-style UI',
-      ]
-    },
-    {
-      date: '2026-02-12',
-      action: 'Vercel Integration',
-      details: [
-        '• Deployed via GitHub Actions',
-        '• Vercel Analytics enabled',
-        '• Auto-deploy on every push',
-      ]
-    },
-  ];
-
-  return `
-    <div style="max-width: 1100px; margin: 0 auto; padding: 24px;">
-      <h1 style="font-size: 48px; font-weight: 700; margin-bottom: 16px;">
-        📌 About This Project
-      </h1>
-      <p style="font-size: 18px; color: #666; max-width: 600px; margin-bottom: 48px;">
-        This blog is fully managed via <strong>Telegram</strong> using OpenClaw AI. 
-        Zero manual intervention required.
-      </p>
-
-      <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">
-        🛠️ Tech Stack
-      </h2>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 48px;">
-        <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5;">
-          <h3 style="font-size: 14px; color: #888; margin-bottom: 8px;">REPO</h3>
-          <p style="font-weight: 600;">GitHub</p>
-          <p style="font-size: 13px; color: #666;">jijinaiooji/vercel-blog</p>
-        </div>
-        <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5;">
-          <h3 style="font-size: 14px; color: #888; margin-bottom: 8px;">HOSTING</h3>
-          <p style="font-weight: 600;">Vercel</p>
-          <p style="font-size: 13px; color: #666;">Auto-deploy enabled</p>
-        </div>
-        <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5;">
-          <h3 style="font-size: 14px; color: #888; margin-bottom: 8px;">FRAMEWORK</h3>
-          <p style="font-weight: 600;">Next.js 14</p>
-          <p style="font-size: 13px; color: #666;">Server Components</p>
-        </div>
-        <div style="background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e5e5e5;">
-          <h3 style="font-size: 14px; color: #888; margin-bottom: 8px;">CONTROL</h3>
-          <p style="font-weight: 600;">Telegram</p>
-          <p style="font-size: 13px; color: #666;">Via OpenClaw AI</p>
-        </div>
-      </div>
-
-      <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">
-        📝 Automation History
-      </h2>
-      <div style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 48px;">
-        ${prompts.map(p => `
-          <div style="background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e5e5e5;">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-              <span style="background: #2d5bff; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                ${p.date}
-              </span>
-              <h3 style="font-weight: 600;">${p.action}</h3>
-            </div>
-            <ul style="list-style: none; padding: 0;">
-              ${p.details.map(d => `<li style="font-size: 14px; color: #666; padding: 4px 0;">${d}</li>`).join('')}
+  return (
+    <>
+      <Header />
+      
+      <main className={styles.main}>
+        <article className={styles.content}>
+          <h1 className={styles.title}>
+            🤖 Built by <span className={styles.highlight}>OpenClaw AI</span>
+          </h1>
+          
+          <section className={styles.section}>
+            <h2>What is OpenClaw?</h2>
+            <p>
+              <strong>OpenClaw</strong> is an open-source AI assistant that lives in your terminal, 
+              cloud machines, and now — your messaging apps. It can read files, write code, 
+              run commands, and manage your infrastructure.
+            </p>
+            <p>
+              This blog? <strong>It was built and deployed entirely through Telegram.</strong> 
+              No terminal. No GitHub web interface. Just messages.
+            </p>
+          </section>
+          
+          <section className={styles.section}>
+            <h2>🔄 How It Works</h2>
+            <ol className={styles.steps}>
+              <li>
+                <strong>User sends a message on Telegram</strong>
+                <p>"Create a Next.js blog for AI news"</p>
+              </li>
+              <li>
+                <strong>OpenClaw receives the message</strong>
+                <p>Routes through the Gateway, parsed as a system event</p>
+              </li>
+              <li>
+                <strong>OpenClaw thinks and plans</strong>
+                <p>Generates code, creates files, commits to git</p>
+              </li>
+              <li>
+                <strong>GitHub Actions triggers</strong>
+                <p>Builds the Next.js app, deploys to Vercel</p>
+              </li>
+              <li>
+                <strong>User gets the Vercel URL</strong>
+                <p>Directly in Telegram, no context switching</p>
+              </li>
+            </ol>
+          </section>
+          
+          <section className={styles.section}>
+            <h2>🛠️ Tech Stack</h2>
+            <ul className={styles.stack}>
+              <li><strong>Next.js 14</strong> — React framework</li>
+              <li><strong>Vercel</strong> — Hosting & serverless functions</li>
+              <li><strong>GitHub Actions</strong> — CI/CD automation</li>
+              <li><strong>OpenClaw</strong> — AI-powered automation layer</li>
+              <li><strong>Telegram</strong> — Human-AI interface</li>
+              <li><strong>RSS Feeds</strong> — AI news aggregation</li>
             </ul>
-          </div>
-        `).join('')}
-      </div>
-
-      <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">
-        💬 Key Prompts Used
-      </h2>
-      <div style="background: #1a1a1a; color: #fff; padding: 24px; border-radius: 12px; margin-bottom: 48px;">
-        <p style="font-size: 14px; color: #888; margin-bottom: 16px;">
-          The entire blog was created using these prompts via Telegram:
-        </p>
-        <ul style="list-style: none; padding: 0;">
-          <li style="padding: 12px 0; border-bottom: 1px solid #333;">
-            "create a wordpress blog on vercel, empty blog" → Next.js blog structure
-          </li>
-          <li style="padding: 12px 0; border-bottom: 1px solid #333;">
-            "how about all news about ai only?" → Added RSS feeds for AI news
-          </li>
-          <li style="padding: 12px 0; border-bottom: 1px solid #333;">
-            "enable analytics first vercel" → Added Vercel Analytics
-          </li>
-          <li style="padding: 12px 0; border-bottom: 1px solid #333;">
-            "update the interface base on the best ui/ux blog of the world" → Figma-style redesign
-          </li>
-        </ul>
-      </div>
-
-      <h2 style="font-size: 24px; font-weight: 600; margin-bottom: 24px;">
-        🔒 Security
-      </h2>
-      <div style="background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e5e5e5;">
-        <p style="font-size: 14px; color: #666; line-height: 1.8;">
-          All credentials (GitHub tokens, Vercel tokens) are managed securely via Telegram. 
-          No passwords are shared in plain text. Tokens are passed temporarily and stored 
-          securely in GitHub Secrets for automation.
-        </p>
-      </div>
-    </div>
-  `;
+          </section>
+          
+          <section className={styles.section}>
+            <h2>🎯 Key Features</h2>
+            <ul className={styles.features}>
+              <li>✅ <strong>Zero manual deployment</strong> — Push to GitHub triggers Vercel</li>
+              <li>✅ <strong>Auto-updating news</strong> — RSS feeds refresh every 12 hours</li>
+              <li>✅ <strong>Serverless API</strong> — News fetched on-demand, cached at edge</li>
+              <li>✅ <strong>Analytics built-in</strong> — Vercel Analytics track visitors</li>
+              <li>✅ <strong>Fully open-source</strong> — Code on GitHub, free to fork</li>
+            </ul>
+          </section>
+          
+          <section className={styles.section}>
+            <h2>🔗 Links</h2>
+            <div className={styles.links}>
+              <a href="https://github.com/jijinaiooji/vercel-blog" className={styles.link}>
+                📦 View Source Code
+              </a>
+              <a href="https://vercel.com" className={styles.link}>
+                ▲ Deploy Your Own
+              </a>
+              <a href="https://github.com/openclaw/openclaw" className={styles.link}>
+                🤖 Get OpenClaw
+              </a>
+            </div>
+          </section>
+          
+          <section className={styles.cta}>
+            <h2>Want one?</h2>
+            <p>
+              OpenClaw can build anything — not just blogs. Websites, apps, 
+              infrastructure, automation scripts — just ask on Telegram.
+            </p>
+            <p className={styles.note}>
+              <strong>Status:</strong> This project was entirely written, committed, 
+              and deployed through AI conversation. No human touched a terminal.
+            </p>
+          </section>
+        </article>
+      </main>
+      
+      <Footer />
+    </>
+  );
 }

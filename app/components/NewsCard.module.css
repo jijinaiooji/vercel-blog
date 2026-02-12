@@ -1,22 +1,21 @@
 .card {
-  background: #ffffff;
+  background: #fff;
+  border: 1px solid #e5e5e5;
   border-radius: 12px;
   padding: 24px;
-  border: 1px solid #e5e5e5;
   transition: all 0.2s ease;
 }
 
 .card:hover {
-  border-color: #000;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  border-color: #ccc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .source {
@@ -24,9 +23,8 @@
   font-weight: 600;
   color: #fff;
   padding: 4px 10px;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  border-radius: 100px;
+  letter-spacing: 0.3px;
 }
 
 .date {
@@ -39,6 +37,7 @@
   font-weight: 600;
   line-height: 1.4;
   margin: 0 0 12px 0;
+  letter-spacing: -0.3px;
 }
 
 .title a {
@@ -47,7 +46,7 @@
 }
 
 .title a:hover {
-  color: #2d5bff;
+  color: #0066cc;
 }
 
 .description {
@@ -55,16 +54,20 @@
   color: #666;
   line-height: 1.6;
   margin: 0 0 16px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .readMore {
   font-size: 13px;
   font-weight: 500;
-  color: #2d5bff;
+  color: #0066cc;
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .readMore:hover {
-  color: #1a4cd8;
+  color: #004499;
 }
