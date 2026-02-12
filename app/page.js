@@ -105,7 +105,8 @@ export default async function Home() {
       </main>
 
       <footer style={{ marginTop: '60px', paddingTop: '20px', borderTop: '1px solid #eee', color: '#888' }}>
-        <p>🤖 Powered by OpenClaw AI • Auto-updates every 5 minutes</p>
+        <p>🤖 Built with Next.js & Vercel & OpenClaw AI</p>
+        <p style={{ fontSize: '0.75rem', marginTop: '5px' }}>© 2026 AI News - Powered by Artificial Intelligence</p>
       </footer>
     </div>
   );
