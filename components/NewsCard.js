@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink } from 'lucide-react';
@@ -58,16 +59,14 @@ export default function NewsCard({ article }) {
           </div>
         </div>
 
-        {/* Title */}
+        {/* Title - links to in-app reader */}
         <h3 className="font-semibold text-zinc-900 dark:text-white leading-snug group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-          <a 
-            href={article.link} 
-            target="_blank" 
-            rel="noopener noreferrer"
+          <Link
+            href={`/article/reader?url=${encodeURIComponent(article.link)}&title=${encodeURIComponent(article.title)}`}
             className="line-clamp-2"
           >
             {article.title}
-          </a>
+          </Link>
         </h3>
         
         {/* Description */}
@@ -76,15 +75,24 @@ export default function NewsCard({ article }) {
         </p>
 
         {/* Read more link */}
-        <div className="pt-2">
+        <div className="pt-2 flex items-center gap-4">
+          <Link
+            href={`/article/reader?url=${encodeURIComponent(article.link)}&title=${encodeURIComponent(article.title)}`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          >
+            Read in app
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </Link>
           <a 
             href={article.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
           >
-            Read more
             <ExternalLink className="w-3.5 h-3.5" />
+            Original
           </a>
         </div>
       </CardContent>
