@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 const RSS_FEEDS = [
   { name: 'OpenAI', url: 'https://openai.com/blog/rss.xml', color: '#10a37f' },
   { name: 'MIT CSAIL', url: 'https://www.csail.mit.edu/rss/news/all.xml', color: '#a31f34' },
@@ -26,7 +28,8 @@ export async function fetchAINews() {
           ...item,
           source: feed.name,
           sourceColor: feed.color,
-          date: formatDate(item.pubDate),
+          date: formatTwitterDate(item.pubDate),
+          pubDate: item.pubDate,
         });
       }
     } catch (error) {
@@ -35,7 +38,7 @@ export async function fetchAINews() {
   }
   
   // Sort by date, newest first
-  articles.sort((a, b) => new Date(b.isoDate) - new Date(a.isoDate));
+  articles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   
   return articles.slice(0, 20);
 }
@@ -64,7 +67,6 @@ function parseRSS(xml) {
           .replace(/<[^>]+>/g, '')
           .substring(0, 200) + '...',
         pubDate: dateMatch[1] || new Date().toISOString(),
-        isoDate: dateMatch[1] || new Date().toISOString(),
       });
     }
   }
@@ -72,18 +74,26 @@ function parseRSS(xml) {
   return items;
 }
 
-function formatDate(dateStr) {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diff = now - date;
+function formatTwitterDate(dateStr) {
+  const date = moment(dateStr);
+  const now = moment();
+  const diffSeconds = now.diff(date, 'seconds');
+  const diffMinutes = now.diff(date, 'minutes');
+  const diffHours = now.diff(date, 'hours');
+  const diffDays = now.diff(date, 'days');
+
+  if (diffSeconds < 60) {
+    return `${diffSeconds}s`;
+  }
+  if (diffMinutes < 60) {
+    return `${diffMinutes}m`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours}h`;
+  }
+  if (diffDays < 365) {
+    return `${diffDays}d`;
+  }
   
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-  
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  if (days < 7) return `${days}d ago`;
-  
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return date.format('MMM D, YYYY');
 }

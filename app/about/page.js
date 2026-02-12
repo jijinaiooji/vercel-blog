@@ -103,7 +103,7 @@ export default function About() {
             </p>
             <p className={styles.note}>
               <strong>Status:</strong> This project was entirely written, committed, 
-              and deployed through AI conversation. No human touched a terminal.
+              and deployed through AI conversation. No human touched a terminal or code.
             </p>
           </section>
         </article>
