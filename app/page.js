@@ -91,7 +91,11 @@ export default function Home() {
   };
 
   const openArticle = (article) => {
-    setSelectedArticle(article);
+    // Normalize URL (RSS uses 'link', we need 'url')
+    setSelectedArticle({
+      ...article,
+      url: article.url || article.link || ''
+    });
   };
 
   const closeArticle = () => {
