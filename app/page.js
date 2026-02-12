@@ -49,12 +49,10 @@ function HomePage() {
     return () => window.removeEventListener('search', handleSearch);
   }, []);
 
-  // Sort by date
   const sortedArticles = useMemo(() => {
     return [...articles].sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   }, [articles]);
 
-  // Filter
   const filteredArticles = useMemo(() => {
     if (!searchQuery.trim()) return sortedArticles;
     const query = searchQuery.toLowerCase();
@@ -65,7 +63,6 @@ function HomePage() {
     );
   }, [sortedArticles, searchQuery]);
 
-  // Paginate
   const paginatedArticles = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredArticles.slice(start, start + ITEMS_PER_PAGE);
@@ -74,7 +71,7 @@ function HomePage() {
   const totalPages = Math.ceil(filteredArticles.length / ITEMS_PER_PAGE);
 
   const goToPage = (page) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages));
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -82,7 +79,6 @@ function HomePage() {
     setSearchQuery('');
   };
 
-  // Group by date for display
   const groupedArticles = useMemo(() => {
     const groups = {};
     paginatedArticles.forEach(article => {
