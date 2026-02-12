@@ -15,6 +15,13 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [totalArticles, setTotalArticles] = useState(0);
 
+  // Force refresh after auth callback
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (new URLSearchParams(window.location.search).get('auth_success') || new URLSearchParams(window.location.search).get('refresh'))) {
+      window.location.href = '/'
+    }
+  }, [])
+
   useEffect(() => {
     async function loadNews() {
       try {
