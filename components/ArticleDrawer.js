@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, ExternalLink, Loader2, Globe, Bookmark, Check } from 'lucide-react'
+import { X, ExternalLink, Loader2, Globe, Bookmark, Check, Image } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 
 export default function ArticleDrawer({ article, onClose }) {
@@ -16,6 +16,9 @@ export default function ArticleDrawer({ article, onClose }) {
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
+
+  // Get article image from RSS data
+  const articleImage = article?.image || article?.thumbnail || ''
 
   useEffect(() => {
     if (document.documentElement.classList.contains('dark')) {
@@ -142,14 +145,14 @@ export default function ArticleDrawer({ article, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="h-[calc(100%-56px)] overflow-y-auto p-5">
+        <div className="h-[calc(100%-56px)] overflow-y-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-64">
               <Loader2 className="w-8 h-8 animate-spin text-zinc-400 mb-4" />
               <p className="text-zinc-500">Loading...</p>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center h-64 text-center">
+            <div className="flex flex-col items-center justify-center h-64 text-center px-4">
               <p className={`mb-4 ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>{error}</p>
               <a href={article.url} target="_blank" rel="noopener noreferrer" className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${
                 isDark ? 'bg-white text-zinc-900' : 'bg-zinc-900 text-white'
@@ -159,7 +162,19 @@ export default function ArticleDrawer({ article, onClose }) {
               </a>
             </div>
           ) : content ? (
-            <>
+            <div className="p-5">
+              {/* Article Image from RSS */}
+              {articleImage && (
+                <div className="mb-4 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900">
+                  <img 
+                    src={articleImage} 
+                    alt={article.title}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                </div>
+              )}
+
               <h1 className={`text-xl font-bold mb-4 ${isDark ? 'text-white' : 'text-zinc-900'}`}>
                 {content.title || article.title}
               </h1>
@@ -187,7 +202,7 @@ export default function ArticleDrawer({ article, onClose }) {
                   <span className="text-sm font-medium">Saved</span>
                 </div>
               )}
-            </>
+            </div>
           ) : null}
         </div>
       </div>

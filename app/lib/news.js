@@ -7,18 +7,10 @@ function formatTwitterDate(dateStr) {
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffSeconds < 60) {
-    return `${diffSeconds}s`;
-  }
-  if (diffMinutes < 60) {
-    return `${diffMinutes}m`;
-  }
-  if (diffHours < 24) {
-    return `${diffHours}h`;
-  }
-  if (diffDays < 365) {
-    return `${diffDays}d`;
-  }
+  if (diffSeconds < 60) return `${diffSeconds}s`;
+  if (diffMinutes < 60) return `${diffMinutes}m`;
+  if (diffHours < 24) return `${diffHours}h`;
+  if (diffDays < 365) return `${diffDays}d`;
   
   return formatDateFull(date);
 }
@@ -80,6 +72,12 @@ function parseRSS(xml) {
   const linkRegex = /<link>(.*?)<\/link>/;
   const descRegex = /<description><!\[CDATA\[(.*?)\]\]><\/description>|<description>(.*?)<\/description>/;
   const dateRegex = /<pubDate>(.*?)<\/pubDate>/;
+  // Extract media:content or media:thumbnail
+  const mediaRegex = /<media:(content|thumbnail)[^>]*url="([^"]*)"[^>]*>|<media:content[^>]*>([\s\S]*?)<\/media:content>/i;
+  // Extract enclosure
+  const enclosureRegex = /<enclosure[^>]*url="([^"]*)"[^>]*type="image\/[^"]*"[^>]*\/>/i;
+  // Extract from content:encoded
+  const contentImgRegex = /<content:encoded>[\s\S]*?<img[^>]*src="([^"]*)"[^>]*>[\s\S]*<\/content:encoded>/i;
   
   let match;
   while ((match = itemRegex.exec(xml)) !== null) {
@@ -89,14 +87,41 @@ function parseRSS(xml) {
     const descMatch = content.match(descRegex);
     const dateMatch = content.match(dateRegex);
     
+    // Try to extract image
+    let image = '';
+    const mediaMatch = content.match(mediaRegex);
+    if (mediaMatch) {
+      image = mediaMatch[2] || mediaMatch[3] || '';
+    }
+    if (!image) {
+      const enclosureMatch = content.match(enclosureRegex);
+      if (enclosureMatch) image = enclosureMatch[1];
+    }
+    if (!image) {
+      const contentImgMatch = content.match(contentImgRegex);
+      if (contentImgMatch) image = contentImgMatch[1];
+    }
+    
+    // Clean description
+    let description = (descMatch[1] || descMatch[2] || '');
+    if (description.includes('[')) {
+      description = description.replace(/\[[^\]]*\]/g, '');
+    }
+    description = description
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 200);
+    if (description.length === 200) description += '...';
+    
     if (titleMatch && linkMatch) {
       items.push({
         title: titleMatch[1] || titleMatch[2] || 'Untitled',
         link: linkMatch[1],
-        description: (descMatch[1] || descMatch[2] || '')
-          .replace(/<[^>]+>/g, '')
-          .substring(0, 200) + '...',
+        description: description,
         pubDate: dateMatch[1] || new Date().toISOString(),
+        image: image,
       });
     }
   }
