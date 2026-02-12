@@ -47,8 +47,6 @@ export default function SavedDrawer({ isOpen, onClose }) {
           .order('saved_at', { ascending: false })
 
         if (error) {
-          // Table might not exist yet
-          console.warn('Saved articles table error:', error.message)
           setError('Saved articles not set up yet')
           setSavedArticles([])
         } else {
@@ -66,12 +64,10 @@ export default function SavedDrawer({ isOpen, onClose }) {
   }, [isOpen])
 
   const handleRemove = async (id, e) => {
+    e.preventDefault()
     e.stopPropagation()
     try {
-      await supabase
-        .from('saved_articles')
-        .delete()
-        .eq('id', id)
+      await supabase.from('saved_articles').delete().eq('id', id)
       setSavedArticles(savedArticles.filter(a => a.id !== id))
     } catch (err) {
       console.error('Remove error:', err)
@@ -79,11 +75,8 @@ export default function SavedDrawer({ isOpen, onClose }) {
   }
 
   const handleRead = (article) => {
-    window.dispatchEvent(new CustomEvent('openArticle', { detail: {
-      url: article.article_url || article.url,
-      title: article.article_title || article.title,
-      source: article.article_source || article.source
-    }}))
+    // Open original article in new tab
+    window.open(article.article_url || article.url, '_blank')
     onClose()
   }
 
@@ -158,9 +151,13 @@ export default function SavedDrawer({ isOpen, onClose }) {
           ) : (
             <div className="p-4 space-y-2">
               {savedArticles.map((article) => (
-                <div key={article.id} onClick={() => handleRead(article)} className={`p-4 rounded-xl cursor-pointer transition-all ${
-                  isDark ? 'bg-zinc-800 hover:bg-zinc-750' : 'bg-zinc-50 hover:bg-zinc-100'
-                }`}>
+                <div 
+                  key={article.id} 
+                  onClick={() => handleRead(article)}
+                  className={`p-4 rounded-xl cursor-pointer transition-all ${
+                    isDark ? 'bg-zinc-800 hover:bg-zinc-750' : 'bg-zinc-50 hover:bg-zinc-100'
+                  }`}
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <h3 className={`font-medium truncate ${
@@ -176,9 +173,12 @@ export default function SavedDrawer({ isOpen, onClose }) {
                         <span>{new Date(article.saved_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <button onClick={(e) => handleRemove(article.id, e)} className={`p-1.5 rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-700 transition-colors ${
-                      isDark ? 'text-zinc-500' : 'text-zinc-400'
-                    }`}>
+                    <button 
+                      onClick={(e) => handleRemove(article.id, e)} 
+                      className={`p-1.5 rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-700 transition-colors ${
+                        isDark ? 'text-zinc-500' : 'text-zinc-400'
+                      }`}
+                    >
                       <X className="w-4 h-4" />
                     </button>
                   </div>

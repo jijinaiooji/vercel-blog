@@ -1,8 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ExternalLink, Bookmark, Check } from 'lucide-react';
+import { createBrowserClient } from '@supabase/ssr';
 
 function formatTwitterDate(dateStr) {
   if (!dateStr) return 'Just now';
@@ -33,66 +35,161 @@ function formatDateFull(dateStr) {
   return `${String(date.getUTCDate()).padStart(2, '0')} ${String(date.getUTCMonth() + 1).padStart(2, '0')} ${date.getUTCFullYear()}`;
 }
 
-export default function NewsCard({ article, onRead }) {
+export default function NewsCard({ article }) {
   const rawDate = article.pubDate || article.date || article.isoDate;
   const displayDate = rawDate ? formatTwitterDate(rawDate) : 'Just now';
   const displayFullDate = rawDate ? formatDateFull(rawDate) : 'Today';
   
-  const handleClick = () => {
-    if (onRead) onRead(article);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  const articleUrl = article.url || article.link || article.article_url;
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
+
+  // Check if saved
+  useEffect(() => {
+    const checkSaved = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user || !articleUrl) {
+        setSaved(false)
+        return
+      }
+      
+      const { data: savedArticle } = await supabase
+        .from('saved_articles')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('article_url', articleUrl)
+        .single()
+      
+      setSaved(!!savedArticle)
+    }
+    
+    checkSaved()
+  }, [articleUrl])
+
+  // Handle save
+  const handleSave = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!articleUrl) return
+    
+    setSaving(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) {
+        alert('Please sign in to save articles')
+        setSaving(false)
+        return
+      }
+
+      if (saved) {
+        await supabase.from('saved_articles').delete().eq('user_id', session.user.id).eq('article_url', articleUrl)
+        setSaved(false)
+      } else {
+        await supabase.from('saved_articles').insert({
+          user_id: session.user.id,
+          article_url: articleUrl,
+          article_title: article.title,
+          article_source: article.source,
+          article_date: article.pubDate,
+          saved_at: new Date().toISOString()
+        })
+        setSaved(true)
+      }
+    } catch (err) {
+      console.error('Save error:', err)
+    } finally {
+      setSaving(false)
+    }
   };
 
   return (
-    <Card 
-      className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
-      onClick={handleClick}
+    <a 
+      href={articleUrl || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block h-full"
     >
-      {/* Image */}
-      {article.image && (
-        <div className="relative h-40 bg-zinc-100 dark:bg-zinc-800">
-          <img 
-            src={article.image} 
-            alt={article.title}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.parentElement.style.display = 'none';
-            }}
-          />
-        </div>
-      )}
-      
-      <CardContent className="p-5 space-y-4">
-        {/* Header: Source badge and date */}
-        <div className="flex items-center justify-between gap-3">
-          <Badge 
-            style={{ backgroundColor: article.sourceColor }}
-            className="text-white text-xs font-medium"
-          >
-            {article.source}
-          </Badge>
-          <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-            <span className="font-medium">{displayDate}</span>
-            <span>•</span>
-            <span>{displayFullDate}</span>
-          </div>
-        </div>
-
-        {/* Title */}
-        <h3 className="font-semibold text-zinc-900 dark:text-white leading-snug text-lg line-clamp-2">
-          {article.title}
-        </h3>
+      <Card className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 overflow-hidden group">
         
-        {/* Description */}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2">
-          {article.description}
-        </p>
+        {/* Image */}
+        {article.image && (
+          <div className="relative h-40 bg-zinc-100 dark:bg-zinc-800">
+            <img 
+              src={article.image} 
+              alt={article.title}
+              className="w-full h-full object-cover"
+              onError={(e) => e.target.parentElement.style.display = 'none'}
+            />
+            {/* Save Button Overlay */}
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
+                saved 
+                  ? 'bg-yellow-500 text-white' 
+                  : 'bg-white/90 dark:bg-zinc-900/90 text-zinc-600 dark:text-zinc-400 hover:bg-yellow-500 hover:text-white'
+              }`}
+            >
+              {saving ? (
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : saved ? (
+                <Bookmark className="w-4 h-4 fill-current" />
+              ) : (
+                <Bookmark className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+        )}
+        
+        <CardContent className="p-5 space-y-4">
+          {/* Header: Source badge and date */}
+          <div className="flex items-center justify-between gap-3">
+            <Badge 
+              style={{ backgroundColor: article.sourceColor }}
+              className="text-white text-xs font-medium"
+            >
+              {article.source}
+            </Badge>
+            <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="font-medium">{displayDate}</span>
+              <span>•</span>
+              <span>{displayFullDate}</span>
+            </div>
+          </div>
 
-        {/* Footer hint */}
-        <div className="pt-2 flex items-center gap-2 text-xs text-zinc-400">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Tap to read in app</span>
-        </div>
-      </CardContent>
-    </Card>
+          {/* Title */}
+          <h3 className="font-semibold text-zinc-900 dark:text-white leading-snug text-lg line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {article.title}
+          </h3>
+          
+          {/* Description */}
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2">
+            {article.description}
+          </p>
+
+          {/* Footer */}
+          <div className="pt-2 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-zinc-400">
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Read on {article.source}</span>
+            </div>
+            
+            {saved && (
+              <div className="flex items-center gap-1 text-xs text-yellow-500">
+                <Check className="w-3.5 h-3.5" />
+                <span>Saved</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </a>
   );
 }

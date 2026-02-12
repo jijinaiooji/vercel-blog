@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/NewsCard';
-import ArticleDrawer from '@/components/ArticleDrawer';
 import { Loader2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 9;
@@ -15,7 +14,6 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalArticles, setTotalArticles] = useState(0);
-  const [selectedArticle, setSelectedArticle] = useState(null);
 
   // Force refresh after auth callback
   useEffect(() => {
@@ -52,15 +50,6 @@ export default function Home() {
     return () => window.removeEventListener('search', handleSearch);
   }, []);
 
-  // Listen for open article event
-  useEffect(() => {
-    const handleOpenArticle = (e) => {
-      setSelectedArticle(e.detail);
-    };
-    window.addEventListener('openArticle', handleOpenArticle);
-    return () => window.removeEventListener('openArticle', handleOpenArticle);
-  }, []);
-
   // Filter articles based on search
   const filteredArticles = useMemo(() => {
     if (!searchQuery.trim()) return articles;
@@ -88,18 +77,6 @@ export default function Home() {
 
   const clearSearch = () => {
     setSearchQuery('');
-  };
-
-  const openArticle = (article) => {
-    // Normalize URL (RSS uses 'link', we need 'url')
-    setSelectedArticle({
-      ...article,
-      url: article.url || article.link || ''
-    });
-  };
-
-  const closeArticle = () => {
-    setSelectedArticle(null);
   };
 
   return (
@@ -157,7 +134,7 @@ export default function Home() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {paginatedArticles.map((article, index) => (
-                    <NewsCard key={index} article={article} onRead={() => openArticle(article)} />
+                    <NewsCard key={index} article={article} />
                   ))}
                 </div>
 
@@ -222,9 +199,6 @@ export default function Home() {
       </main>
       
       <Footer />
-      
-      {/* Article Drawer */}
-      <ArticleDrawer article={selectedArticle} onClose={closeArticle} />
     </>
   );
 }
