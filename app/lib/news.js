@@ -23,11 +23,28 @@ function formatDateFull(date) {
 }
 
 const RSS_FEEDS = [
+  // Major Labs
   { name: 'OpenAI', url: 'https://openai.com/blog/rss.xml', color: '#10a37f' },
-  { name: 'MIT CSAIL', url: 'https://www.csail.mit.edu/rss/news/all.xml', color: '#a31f34' },
+  { name: 'Anthropic', url: 'https://www.anthropic.com/rss.xml', color: '#d4a574' },
   { name: 'Google AI', url: 'https://b Gardner.googleblog.com/atom.xml', color: '#4285f4' },
-  { name: 'AI News', url: 'https://artificialintelligence.news/feed/', color: '#ff6b35' },
+  { name: 'Meta AI', url: 'https://ai.meta.com/blog/rss.xml', color: '#0668E1' },
   { name: 'Microsoft AI', url: 'https://blogs.microsoft.com/ai/feed/', color: '#00a4ef' },
+  { name: 'DeepMind', url: 'https://deepmind.google/blog/rss.xml', color: '#4285f4' },
+  { name: 'Stability AI', url: 'https://stability.ai/rss.xml', color: '#0066cc' },
+  
+  // Research & News
+  { name: 'MIT CSAIL', url: 'https://www.csail.mit.edu/rss/news/all.xml', color: '#a31f34' },
+  { name: 'AI News', url: 'https://artificialintelligence.news/feed/', color: '#ff6b35' },
+  { name: 'MIT Tech Review', url: 'https://www.technologyreview.com/topic/artificial-intelligence/feed', color: '#000000' },
+  { name: 'The Gradient', url: 'https://thegradient.pub/feed', color: '#5c6bc0' },
+  { name: 'Last Week in AI', url: 'https://lastweekin.ai/feed', color: '#26a69a' },
+  
+  // Newsletters & Blogs
+  { name: 'Hugging Face', url: 'https://huggingface.co/blog/feed.xml', color: '#ffd700' },
+  { name: 'NVIDIA', url: 'https://blogs.nvidia.com/blog/category/deep-learning/feed/', color: '#76b900' },
+  { name: 'AssemblyAI', url: 'https://www.assemblyai.com/blog/rss.xml', color: '#6366f1' },
+  { name: 'Cohere', url: 'https://cohere.com/blog/rss.xml', color: '#0f9d58' },
+  { name: 'LangChain', url: 'https://blog.langchain.dev/rss/', color: '#0066cc' },
 ];
 
 export async function fetchAINews() {
@@ -62,7 +79,7 @@ export async function fetchAINews() {
   
   articles.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
   
-  return articles.slice(0, 20);
+  return articles.slice(0, 30);
 }
 
 function parseRSS(xml) {
