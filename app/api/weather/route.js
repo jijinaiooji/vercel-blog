@@ -26,23 +26,16 @@ const WEATHER_APIS = [
 // Get location from IP
 async function getLocationFromIP(ip) {
   try {
-    // Try multiple free geolocation services
-    const services = [
-      `https://ipapi.co/${ip}/json/`,
-      `https://ipapi.com/json/${ip}?key=free`,
-    ];
-    
-    for (const url of services) {
-      try {
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.latitude && data.longitude) {
-            return { lat: data.latitude, lon: data.longitude };
-          }
-        }
-      } catch (e) {
-        continue;
+    // ipapi.co - free tier returns city info
+    const res = await fetch(`https://ipapi.co/${ip}/json/`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.latitude && data.longitude) {
+        return { 
+          lat: data.latitude, 
+          lon: data.longitude,
+          city: data.city || data.country_name || 'Unknown'
+        };
       }
     }
     return null;
@@ -95,8 +88,8 @@ function getWeatherEmoji(code) {
 
 export async function GET(request) {
   try {
-    // Default fallback location (Paris)
-    const DEFAULT_LOC = { lat: 48.8566, lon: 2.3522 };
+    // Default fallback location
+    const DEFAULT_LOC = { lat: 48.8566, lon: 2.3522, city: 'Paris' };
     
     // Get user IP
     const headers = request.headers;
@@ -123,7 +116,11 @@ export async function GET(request) {
       condition: WEATHER_CODES[weather.code] || 'Unknown',
       emoji: getWeatherEmoji(weather.code),
       source: weather.source,
-      location: { lat: location.lat, lon: location.lon }
+      location: { 
+        lat: location.lat, 
+        lon: location.lon,
+        city: location.city
+      }
     });
   } catch (error) {
     console.error('Weather error:', error);
@@ -132,7 +129,8 @@ export async function GET(request) {
       temp: null,
       condition: 'Unavailable',
       emoji: '❓',
-      source: 'error'
+      source: 'error',
+      location: { city: 'Error' }
     });
   }
 }

@@ -140,6 +140,9 @@ export default function Header() {
             <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400">
               <span>{weather ? weather.emoji : '🌤️'}</span>
               <span className="font-medium">{weather && weather.temp != null ? `${weather.temp}°C` : '...'}</span>
+              {weather && weather.location?.city && (
+                <span className="text-zinc-400">• {weather.location.city}</span>
+              )}
             </div>
 
             {/* Theme Toggle - Desktop */}
@@ -197,6 +200,9 @@ export default function Header() {
             <div className="flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
               <span>{weather ? weather.emoji : '🌤️'}</span>
               <span className="font-medium">{weather && weather.temp != null ? `${weather.temp}°C` : '...'}</span>
+              {weather && weather.location?.city && (
+                <span className="text-zinc-400">• {weather.location.city}</span>
+              )}
             </div>
 
             {/* Theme Toggle - Mobile */}
