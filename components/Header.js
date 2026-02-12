@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Menu, X, Sun, Moon, Zap, Search, User, LogOut, Bookmark } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import SavedDrawer from '@/components/SavedDrawer';
+import { createBrowserClient } from '@supabase/ssr';
 
 export default function Header() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -15,6 +16,12 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [weather, setWeather] = useState(null);
+  const [savedCount, setSavedCount] = useState(0);
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +46,34 @@ export default function Header() {
     }
     loadWeather();
   }, []);
+
+  // Fetch saved articles count
+  useEffect(() => {
+    const fetchSavedCount = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.user) {
+          setSavedCount(0)
+          return
+        }
+        
+        const { count } = await supabase
+          .from('saved_articles')
+          .select('id', { count: 'exact' })
+          .eq('user_id', session.user.id)
+        
+        setSavedCount(count || 0)
+      } catch (e) {
+        setSavedCount(0)
+      }
+    }
+
+    fetchSavedCount()
+    // Refresh when saved drawer closes
+    if (savedOpen === false) {
+      fetchSavedCount()
+    }
+  }, [savedOpen]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -135,13 +170,18 @@ export default function Header() {
 
             {/* Right Section */}
             <div className="flex items-center gap-2">
-              {/* Saved Button */}
+              {/* Saved Button with Counter */}
               <button
                 onClick={() => setSavedOpen(true)}
-                className="hidden md:flex p-2 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
+                className="hidden md:flex relative p-2 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all"
                 aria-label="Saved articles"
               >
                 <Bookmark className="w-4 h-4" />
+                {savedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {savedCount > 9 ? '9+' : savedCount}
+                  </span>
+                )}
               </button>
 
               {/* Weather Display */}
@@ -209,8 +249,16 @@ export default function Header() {
                 onClick={() => { setSavedOpen(true); setIsOpen(false); }}
                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all w-full"
               >
-                <Bookmark className="w-4 h-4" />
+                <div className="relative">
+                  <Bookmark className="w-4 h-4" />
+                  {savedCount > 0 && (
+                    <span className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {savedCount > 9 ? '9+' : savedCount}
+                    </span>
+                  )}
+                </div>
                 Saved Articles
+                {savedCount > 0 && <span className="text-xs opacity-60">({savedCount > 9 ? '9+' : savedCount})</span>}
               </button>
 
               {/* Weather - Mobile */}
@@ -236,7 +284,24 @@ export default function Header() {
       </header>
 
       {/* Saved Drawer */}
-      <SavedDrawer isOpen={savedOpen} onClose={() => setSavedOpen(false)} />
+      <SavedDrawer isOpen={savedOpen} onClose={() => setSavedOpen(false)} onRefresh={() => {
+        // Refresh count when drawer closes
+        const refreshCount = async () => {
+          try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session?.user) {
+              setSavedCount(0)
+              return
+            }
+            const { count } = await supabase
+              .from('saved_articles')
+              .select('id', { count: 'exact' })
+              .eq('user_id', session.user.id)
+            setSavedCount(count || 0)
+          } catch (e) {}
+        }
+        refreshCount()
+      }} />
     </>
   );
 }

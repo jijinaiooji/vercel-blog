@@ -5,7 +5,7 @@ import { X, Bookmark, ExternalLink } from 'lucide-react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
 
-export default function SavedDrawer({ isOpen, onClose }) {
+export default function SavedDrawer({ isOpen, onClose, onRefresh }) {
   const [isDark, setIsDark] = useState(true)
   const [savedArticles, setSavedArticles] = useState([])
   const [loading, setLoading] = useState(true)
@@ -69,6 +69,7 @@ export default function SavedDrawer({ isOpen, onClose }) {
     try {
       await supabase.from('saved_articles').delete().eq('id', id)
       setSavedArticles(savedArticles.filter(a => a.id !== id))
+      if (onRefresh) onRefresh()
     } catch (err) {
       console.error('Remove error:', err)
     }
