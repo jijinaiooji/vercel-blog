@@ -20,6 +20,22 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    // Load theme from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDark(true);
+    } else if (savedTheme === 'light') {
+      setIsDark(false);
+    } else {
+      // Default to dark if no preference saved
+      setIsDark(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save theme to localStorage
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
