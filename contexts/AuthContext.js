@@ -10,14 +10,21 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    console.log('AuthContext: Initializing...')
+    
     // Check initial session
     getUser().then((userData) => {
+      console.log('AuthContext: getUser result:', userData)
       setUser(userData)
+      setLoading(false)
+    }).catch((err) => {
+      console.error('AuthContext: getUser error:', err)
       setLoading(false)
     })
 
     // Listen for auth changes
     const { data: { subscription } } = onAuthStateChange((event, session) => {
+      console.log('AuthContext: onAuthStateChange:', event, session?.user?.email)
       setUser(session?.user || null)
       setLoading(false)
     })
