@@ -2,18 +2,23 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
-  const url = searchParams.get('url')
+  let url = searchParams.get('url')
 
   if (!url) {
     return Response.json({ error: 'URL required' }, { status: 400 })
   }
 
   try {
+    // Add https if no protocol
+    if (!url.startsWith('http')) {
+      url = 'https://' + url
+    }
+
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; AI-News-Reader/1.0)'
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15'
       },
-      next: { revalidate: 60 }
+      signal: AbortSignal.timeout(10000) // 10 second timeout
     })
 
     if (!response.ok) {
@@ -26,156 +31,89 @@ export async function GET(request) {
     const titleMatch = html.match(/<title>([^<]+)<\/title>/i)
     const title = titleMatch ? titleMatch[1].replace(/\|.*$/, '').replace(/[-–] .*$/, '').trim() : 'Untitled Article'
 
-    // Extract meta description
+    // Extract description
     let description = ''
-    const descPatterns = [
-      /<meta[^>]*name="description"[^>]*content="([^"]*)"/i,
-      /<meta[^>]*content="([^"]*)"[^>]*name="description"/i,
-      /<meta[^>]*property="og:description"[^>]*content="([^"]*)"/i,
-    ]
-    for (const pattern of descPatterns) {
-      const match = html.match(pattern)
-      if (match) {
-        description = match[1].trim()
-        break
-      }
-    }
+    const descMatch = html.match(/<meta[^>]*property="og:description"[^>]*content="([^"]*)"/i) ||
+                    html.match(/<meta[^>]*name="description"[^>]*content="([^"]*)"/i)
+    if (descMatch) description = descMatch[1].trim()
 
-    // Find article content
-    let content = ''
-    
-    // Try JSON-LD first
-    const jsonLdMatch = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i)
-    if (jsonLdMatch) {
-      try {
-        const jsonLd = JSON.parse(jsonLdMatch[1])
-        if (jsonLd.articleBody || jsonLd.description) {
-          content = jsonLd.articleBody || jsonLd.description
-        }
-      } catch (e) {}
-    }
-
-    // Try article tag
-    if (!content) {
-      const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i)
-      if (articleMatch) {
-        content = articleMatch[1]
-      }
-    }
-
-    // Try main content
-    if (!content) {
-      const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
-      if (mainMatch) {
-        content = mainMatch[1]
-      }
-    }
-
-    // If still no content, get body
-    if (!content) {
-      const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-      content = bodyMatch ? bodyMatch[1] : html
-    }
-
-    // Clean content
-    content = content
-      // Remove scripts and styles
+    // Extract text content only
+    let content = html
       .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, '')
-      .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')
-      .replace(/<form[^>]*>[\s\S]*?<\/form>/gi, '')
       .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
       .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
       .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+      .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '')
       .replace(/<!--[\s\S]*?-->/g, '')
       .replace(/<ins[^>]*>[\s\S]*?<\/ins>/g, '')
-      .replace(/<aside[^>]*>[\s\S]*?<\/aside>/gi, '')
-      .replace(/<advertisement[^>]*>[\s\S]*?<\/advertisement>/gi, '')
-      .replace(/<ad[^>]*>[\s\S]*?<\/ad>/gi, '')
-      .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')
-      .replace(/<button[^>]*>[\s\S]*?<\/button>/gi, '')
-      .replace(/<select[^>]*>[\s\S]*?<\/select>/gi, '')
+      .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/g, '')
+      .replace(/<form[^>]*>[\s\S]*?<\/form>/g, '')
 
-    // Process images
-    content = content.replace(/<img([^>]*)src=["']([^"']*)["']([^>]*)>/gi, (match, before, src, after) => {
-      if (!src || src.startsWith('data:') || src.includes('ad') || src.includes('track') || src.includes('pixel')) {
-        return ''
-      }
-      // Fix relative URLs
-      const fullSrc = src.startsWith('http') ? src : (src.startsWith('/') ? new URL(url).origin + src : new URL(src, url).href)
-      return `<img src="${fullSrc}" alt="${title}" style="max-width:100%;height:auto;border-radius:8px;margin:16px auto;display:block;" loading="lazy" />`
-    })
+    // Get body or article
+    const articleMatch = content.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ||
+                        content.match(/<main[^>]*>([\s\S]*?)<\/main>/i) ||
+                        content.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+    content = articleMatch ? articleMatch[1] : content
 
-    // Fix links
-    content = content.replace(/<a([^>]*)href=["']([^"']*)["']([^>]*)>/gi, (match, before, href, after) => {
-      if (!href || href.startsWith('javascript:') || href.startsWith('#')) {
-        return `<span${before}>`
-      }
-      const fullHref = href.startsWith('http') ? href : (href.startsWith('/') ? new URL(url).origin + href : new URL(href, url).href)
-      return `<a href="${fullHref}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;"${before}>`
-    })
-
-    // Clean and format text
+    // Convert to plain text with basic formatting
     content = content
-      // Replace block elements with proper spacing
-      .replace(/<\/p>/gi, '</p>\n\n')
-      .replace(/<\/h[1-6]>/gi, '</h3>\n\n')
-      .replace(/<\/li>/gi, '</li>\n')
-      .replace(/<\/div>/gi, '</div>\n')
-      .replace(/<\/section>/gi, '</section>\n')
-      .replace(/<\/article>/gi, '</article>\n')
+      .replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, '\n\n### $1\n\n')
+      .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '\n$1\n')
+      .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, '\n• $1')
+      .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, '\n> $1')
+      .replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/gi, '\n[IMAGE: $2]\n')
+      .replace(/<img[^>]*src="([^"]*)"[^>]*\/?>/gi, '\n[IMAGE]\n')
+      .replace(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '') // Remove remaining tags
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/\[\s¶]/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/^\n+/, '')
+      .replace(/\n+$/, '')
+      .trim()
 
-    // Convert remaining HTML to readable text with basic formatting
-    const tempDiv = document ? document.createElement('div') : { innerHTML: content }
-    // For server-side, we'll return raw HTML and let client handle it
-    
+    // Limit size
+    if (content.length > 15000) {
+      content = content.substring(0, 15000) + '\n\n...'
+    }
+
     // Extract author
     let author = ''
-    const authorPatterns = [
-      /<meta[^>]*name="author"[^>]*content="([^"]*)"/i,
-      /<meta[^>]*property="article:author"[^>]*content="([^"]*)"/i,
-      /by\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/i,
-    ]
-    for (const pattern of authorPatterns) {
-      const match = html.match(pattern)
-      if (match) {
-        author = match[1].trim()
-        break
-      }
-    }
+    const authorMatch = html.match(/<meta[^>]*name="author"[^>]*content="([^"]*)"/i) ||
+                       html.match(/<meta[^>]*property="article:author"[^>]*content="([^"]*)"/i)
+    if (authorMatch) author = authorMatch[1].trim()
 
-    // Extract published date
+    // Extract date
     let date = ''
-    const datePatterns = [
-      /<meta[^>]*property="article:published_time"[^>]*content="([^"]*)"/i,
-      /<time[^>]*datetime="([^"]*)"/i,
-    ]
-    for (const pattern of datePatterns) {
-      const match = html.match(pattern)
-      if (match) {
-        date = new Date(match[1]).toLocaleDateString()
-        break
-      }
-    }
-
-    // Limit content size
-    if (content.length > 50000) {
-      content = content.substring(0, 50000) + '\n\n<p>... (article truncated)</p>'
+    const dateMatch = html.match(/<meta[^>]*property="article:published_time"[^>]*content="([^"]*)"/i) ||
+                     html.match(/<time[^>]*datetime="([^"]*)"/i)
+    if (dateMatch) {
+      try {
+        date = new Date(dateMatch[1]).toLocaleDateString()
+      } catch (e) {}
     }
 
     return Response.json({
-      title: title.trim(),
-      description,
-      content,
-      author,
-      date,
-      url,
+      title: title,
+      description: description,
+      content: content,
+      author: author,
+      date: date,
+      url: url,
       originalUrl: url
     })
 
   } catch (error) {
     console.error('Article parse error:', error)
-    return Response.json({ error: 'Failed to parse article' }, { status: 500 })
+    return Response.json({ 
+      error: error.message || 'Failed to load article',
+      message: 'The article could not be loaded. Tap "Read on original site" below.'
+    }, { status: 500 })
   }
 }
