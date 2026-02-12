@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Github, Zap, Terminal, Twitter, Facebook } from 'lucide-react';
+import { Github, Zap, Terminal, Twitter, Facebook, Mastodon } from 'lucide-react';
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -18,6 +18,7 @@ export default function Footer() {
     share: [
       { label: 'Share on X', href: 'https://twitter.com/intent/tweet?text=Check+out+this+AI+News+aggregator&url=https://vercel-blog-beige-five.vercel.app', icon: Twitter, color: 'text-black dark:text-white' },
       { label: 'Share on Facebook', href: 'https://www.facebook.com/sharer/sharer.php?u=https://vercel-blog-beige-five.vercel.app', icon: Facebook, color: 'text-blue-600' },
+      { label: 'Share on Mastodon', href: 'https://mastodon.social/share?text=Check+out+this+AI+News+aggregator&url=https://vercel-blog-beige-five.vercel.app', icon: Mastodon, color: 'text-purple-600' },
     ],
   };
 

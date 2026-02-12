@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Bookmark, Share2, Twitter, Facebook, Linkedin } from 'lucide-react';
+import { ExternalLink, Bookmark, Share2, Twitter, Facebook, Linkedin, Mastodon } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 
 function formatTwitterDate(dateStr) {
@@ -134,6 +134,14 @@ export default function NewsCard({ article }) {
     setShowShare(false)
   }
 
+  const shareMastodon = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const text = `${article.title}`
+    window.open(`https://mastodon.social/share?text=${encodeURIComponent(text)}&url=${encodeURIComponent(articleUrl)}`, '_blank')
+    setShowShare(false)
+  }
+
   const copyLink = async (e) => {
     e.preventDefault()
     e.stopPropagation()
@@ -185,6 +193,9 @@ export default function NewsCard({ article }) {
               </button>
               <button onClick={shareLinkedIn} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-blue-700 hover:bg-blue-50">
                 <Linkedin className="w-4 h-4" />
+              </button>
+              <button onClick={shareMastodon} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-purple-600 hover:bg-purple-50">
+                <Mastodon className="w-4 h-4" />
               </button>
             </div>
           )}
