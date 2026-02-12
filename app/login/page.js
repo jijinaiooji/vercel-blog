@@ -143,11 +143,13 @@ export default function LoginPage() {
               </div>
             )}
             {success && (
-              <div className={`mb-6 p-4 rounded-xl flex items-start gap-3 text-sm ${
+              <div className={`mb-4 p-4 rounded-xl ${
                 isDark ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-900/30' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
               }`}>
-                <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                {success}
+                <p>{success}</p>
+                <p className="mt-2 text-xs opacity-75">
+                  💡 Tip: Check your spam folder if you don't see the email.
+                </p>
               </div>
             )}
 
