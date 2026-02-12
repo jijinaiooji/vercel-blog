@@ -97,7 +97,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className="relative py-16 sm:py-24 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-medium text-yellow-500 dark:text-yellow-400 mb-6">
               <Sparkles className="w-3.5 h-3.5" />
               <span>AI-Powered News Aggregator</span>
             </div>
