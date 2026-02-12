@@ -65,7 +65,7 @@ export default function Header() {
           </Link>
 
           {/* Search Bar - Desktop */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-md mx-8">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xs mx-8">
             <div className={`relative w-full transition-all duration-200 ${
               searchFocused ? 'scale-105' : ''
             }`}>
@@ -82,8 +82,21 @@ export default function Header() {
             </div>
           </form>
 
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
           {/* Right Section */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Theme Toggle - Desktop */}
             <button
               onClick={() => setIsDark(!isDark)}
