@@ -3,16 +3,13 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, ExternalLink, Bookmark, Check } from 'lucide-react';
+import { ExternalLink, Bookmark } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 
 function formatTwitterDate(dateStr) {
   if (!dateStr) return 'Just now';
-  if (!dateStr.includes('T') && /^\d+[smhd]$/.test(dateStr)) return dateStr;
-  
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return 'Unknown';
-  
   const now = new Date();
   const diffMs = now - date;
   const diffSeconds = Math.floor(diffMs / 1000);
@@ -41,9 +38,9 @@ export default function NewsCard({ article }) {
   const displayFullDate = rawDate ? formatDateFull(rawDate) : 'Today';
   
   const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   
-  const articleUrl = article.url || article.link || article.article_url;
+  const articleUrl = article.url || article.link;
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -53,59 +50,74 @@ export default function NewsCard({ article }) {
   // Check if saved
   useEffect(() => {
     const checkSaved = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user || !articleUrl) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.user || !articleUrl) {
+          setSaved(false)
+          return
+        }
+        
+        const { data } = await supabase
+          .from('saved_articles')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .eq('article_url', articleUrl)
+          .single()
+        
+        setSaved(!!data)
+      } catch (e) {
+        console.log('Check saved error:', e)
         setSaved(false)
-        return
       }
-      
-      const { data: savedArticle } = await supabase
-        .from('saved_articles')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('article_url', articleUrl)
-        .single()
-      
-      setSaved(!!savedArticle)
     }
     
-    checkSaved()
+    if (articleUrl) checkSaved()
   }, [articleUrl])
 
-  // Handle save
+  // Handle save/unsave
   const handleSave = async (e) => {
     e.preventDefault()
     e.stopPropagation()
     
     if (!articleUrl) return
     
-    setSaving(true)
+    setLoading(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
+      
       if (!session?.user) {
-        alert('Please sign in to save articles')
-        setSaving(false)
+        // Redirect to login
+        window.location.href = '/login'
         return
       }
 
       if (saved) {
-        await supabase.from('saved_articles').delete().eq('user_id', session.user.id).eq('article_url', articleUrl)
+        // Remove from saved
+        await supabase
+          .from('saved_articles')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('article_url', articleUrl)
         setSaved(false)
       } else {
-        await supabase.from('saved_articles').insert({
-          user_id: session.user.id,
-          article_url: articleUrl,
-          article_title: article.title,
-          article_source: article.source,
-          article_date: article.pubDate,
-          saved_at: new Date().toISOString()
-        })
+        // Add to saved
+        await supabase
+          .from('saved_articles')
+          .insert({
+            user_id: session.user.id,
+            article_url: articleUrl,
+            article_title: article.title,
+            article_source: article.source,
+            article_date: article.pubDate,
+            saved_at: new Date().toISOString()
+          })
         setSaved(true)
       }
     } catch (err) {
       console.error('Save error:', err)
+      alert('Error saving article. Make sure the Supabase table is set up.')
     } finally {
-      setSaving(false)
+      setLoading(false)
     }
   };
 
@@ -120,7 +132,7 @@ export default function NewsCard({ article }) {
     >
       <Card className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 overflow-hidden group relative">
         
-        {/* Image (if available) */}
+        {/* Image */}
         {hasImage && (
           <div className="relative h-40 bg-zinc-100 dark:bg-zinc-800">
             <img 
@@ -132,35 +144,27 @@ export default function NewsCard({ article }) {
           </div>
         )}
         
-        {/* Save Button - Always Visible */}
+        {/* Bookmark Button */}
         <button
           onClick={handleSave}
-          disabled={saving}
           className={`absolute z-10 p-2 rounded-full transition-all ${
-            hasImage 
-              ? 'top-3 right-3' 
-              : 'top-3 right-3'
+            hasImage ? 'top-3 right-3' : 'top-3 right-3'
           } ${
             saved 
               ? 'bg-yellow-500 text-white' 
               : 'bg-white/90 dark:bg-zinc-900/90 text-zinc-600 dark:text-zinc-400 hover:bg-yellow-500 hover:text-white shadow-md'
           }`}
-          onClickCapture={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
+          disabled={loading}
         >
-          {saving ? (
+          {loading ? (
             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          ) : saved ? (
-            <Bookmark className="w-4 h-4 fill-current" />
           ) : (
-            <Bookmark className="w-4 h-4" />
+            <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
           )}
         </button>
         
         <CardContent className="p-5 space-y-4">
-          {/* Header: Source badge and date */}
+          {/* Header */}
           <div className="flex items-center justify-between gap-3 pr-10">
             <Badge 
               style={{ backgroundColor: article.sourceColor }}
