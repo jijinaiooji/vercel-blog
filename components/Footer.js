@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Github, Zap, Terminal, Twitter } from 'lucide-react';
+import { Github, Zap, Terminal, Twitter, Facebook } from 'lucide-react';
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -9,16 +9,15 @@ export default function Footer() {
   const footerLinks = {
     product: [
       { label: 'Latest', href: '/' },
-      { label: 'News', href: '/#news' },
       { label: 'About', href: '/about' },
     ],
     resources: [
       { label: 'GitHub', href: 'https://github.com/jijinaiooji/vercel-blog', icon: Github },
-      { label: 'Vercel', href: 'https://vercel.com', icon: Zap },
-      { label: 'OpenClaw', href: 'https://github.com/openclaw/openclaw', icon: Terminal },
+      { label: 'Star us on GitHub ⭐', href: 'https://github.com/jijinaiooji/vercel-blog', icon: Github },
     ],
-    social: [
-      { label: 'Twitter', href: '#', icon: Twitter },
+    share: [
+      { label: 'Share on X', href: 'https://twitter.com/intent/tweet?text=Check+out+this+AI+News+aggregator&url=https://vercel-blog-beige-five.vercel.app', icon: Twitter, color: 'text-black dark:text-white' },
+      { label: 'Share on Facebook', href: 'https://www.facebook.com/sharer/sharer.php?u=https://vercel-blog-beige-five.vercel.app', icon: Facebook, color: 'text-blue-600' },
     ],
   };
 
@@ -64,7 +63,7 @@ export default function Footer() {
 
           {/* Resources */}
           <div>
-            <h4 className="font-medium text-zinc-900 dark:text-white mb-4">Resources</h4>
+            <h4 className="font-medium text-zinc-900 dark:text-white mb-4">Open Source</h4>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.label}>
@@ -82,20 +81,20 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Social */}
+          {/* Share */}
           <div>
-            <h4 className="font-medium text-zinc-900 dark:text-white mb-4">Social</h4>
+            <h4 className="font-medium text-zinc-900 dark:text-white mb-4">Share</h4>
             <ul className="space-y-3">
-              {footerLinks.social.map((link) => (
+              {footerLinks.share.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2"
+                    className={`text-sm hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-2 ${link.color || ''}`}
                   >
                     <link.icon className="w-4 h-4" />
-                    {link.label}
+                    {link.label.replace('Share on ', '')}
                   </a>
                 </li>
               ))}
@@ -106,13 +105,17 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-zinc-200 dark:border-zinc-800">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 text-center sm:text-left">
-              Built with Next.js, Vercel & OpenClaw AI
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              © {year} AI News • Open Source on GitHub
             </p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 flex items-center gap-1">
-              <span>🤖</span>
-              Generated entirely by AI — no human wrote code
-            </p>
+            <a 
+              href="https://github.com/jijinaiooji/vercel-blog" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+            >
+              ⭐ Star us on GitHub
+            </a>
           </div>
         </div>
       </div>

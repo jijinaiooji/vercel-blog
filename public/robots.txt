@@ -1,0 +1,13 @@
+# robots.txt for AI News
+User-agent: *
+Allow: /
+
+Sitemap: https://vercel-blog-beige-five.vercel.app/sitemap.xml
+
+# AI bots
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: CCBot
+Allow: /

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Bookmark } from 'lucide-react';
+import { ExternalLink, Bookmark, Share2, Twitter, Facebook, Linkedin } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
 
 function formatTwitterDate(dateStr) {
@@ -39,6 +39,7 @@ export default function NewsCard({ article }) {
   
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   
   const articleUrl = article.url || article.link;
 
@@ -66,7 +67,6 @@ export default function NewsCard({ article }) {
         
         setSaved(!!data)
       } catch (e) {
-        console.log('Check saved error:', e)
         setSaved(false)
       }
     }
@@ -86,40 +86,60 @@ export default function NewsCard({ article }) {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session?.user) {
-        // Redirect to login
         window.location.href = '/login'
         return
       }
 
       if (saved) {
-        // Remove from saved
-        await supabase
-          .from('saved_articles')
-          .delete()
-          .eq('user_id', session.user.id)
-          .eq('article_url', articleUrl)
+        await supabase.from('saved_articles').delete().eq('user_id', session.user.id).eq('article_url', articleUrl)
         setSaved(false)
       } else {
-        // Add to saved
-        await supabase
-          .from('saved_articles')
-          .insert({
-            user_id: session.user.id,
-            article_url: articleUrl,
-            article_title: article.title,
-            article_source: article.source,
-            article_date: article.pubDate,
-            saved_at: new Date().toISOString()
-          })
+        await supabase.from('saved_articles').insert({
+          user_id: session.user.id,
+          article_url: articleUrl,
+          article_title: article.title,
+          article_source: article.source,
+          article_date: article.pubDate,
+          saved_at: new Date().toISOString()
+        })
         setSaved(true)
       }
     } catch (err) {
       console.error('Save error:', err)
-      alert('Error saving article. Make sure the Supabase table is set up.')
     } finally {
       setLoading(false)
     }
   };
+
+  // Share functions
+  const shareTwitter = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const text = `${article.title}`
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(articleUrl)}`, '_blank')
+    setShowShare(false)
+  }
+
+  const shareFacebook = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(articleUrl)}`, '_blank')
+    setShowShare(false)
+  }
+
+  const shareLinkedIn = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(articleUrl)}`, '_blank')
+    setShowShare(false)
+  }
+
+  const copyLink = async (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    await navigator.clipboard.writeText(articleUrl)
+    setShowShare(false)
+  }
 
   const hasImage = !!article.image;
 
@@ -144,11 +164,37 @@ export default function NewsCard({ article }) {
           </div>
         )}
         
+        {/* Actions */}
+        <div className="absolute top-3 right-3 z-10 flex gap-1">
+          {/* Share Button */}
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowShare(!showShare); }}
+            className={`p-2 rounded-full bg-white/90 dark:bg-zinc-900/90 text-zinc-600 dark:text-zinc-400 hover:text-blue-500 shadow-md transition-all ${showShare ? 'text-blue-500' : ''}`}
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+          
+          {/* Share Options */}
+          {showShare && (
+            <div className="flex gap-1 animate-in fade-in slide-in-from-right-2 duration-200" onClick={(e) => e.preventDefault()}>
+              <button onClick={shareTwitter} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-blue-400 hover:bg-blue-50">
+                <Twitter className="w-4 h-4" />
+              </button>
+              <button onClick={shareFacebook} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-blue-600 hover:bg-blue-50">
+                <Facebook className="w-4 h-4" />
+              </button>
+              <button onClick={shareLinkedIn} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-blue-700 hover:bg-blue-50">
+                <Linkedin className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
+        
         {/* Bookmark Button */}
         <button
           onClick={handleSave}
           className={`absolute z-10 p-2 rounded-full transition-all ${
-            hasImage ? 'top-3 right-3' : 'top-3 right-3'
+            hasImage ? 'top-3 left-3' : 'top-3 left-3'
           } ${
             saved 
               ? 'bg-yellow-500 text-white' 
@@ -165,7 +211,7 @@ export default function NewsCard({ article }) {
         
         <CardContent className="p-5 space-y-4">
           {/* Header */}
-          <div className="flex items-center justify-between gap-3 pr-10">
+          <div className="flex items-center justify-between gap-3">
             <Badge 
               style={{ backgroundColor: article.sourceColor }}
               className="text-white text-xs font-medium"
