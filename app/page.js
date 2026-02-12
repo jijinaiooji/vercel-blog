@@ -6,7 +6,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/NewsCard';
-import { Loader2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 const ITEMS_PER_PAGE = 12;
@@ -80,7 +80,7 @@ function HomePage() {
   };
 
   const groupedArticles = useMemo(() => {
-    const groups = { today: [], yesterday: [], thisWeek: [], earlier: [] };
+    const groups = { today: [], yesterday: [], thisWeek: [] };
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const yesterday = new Date(today);
@@ -93,7 +93,6 @@ function HomePage() {
       if (pubDate >= today) groups.today.push(article);
       else if (pubDate >= yesterday) groups.yesterday.push(article);
       else if (pubDate >= weekAgo) groups.thisWeek.push(article);
-      else groups.earlier.push(article);
     });
 
     return groups;
@@ -122,27 +121,17 @@ function HomePage() {
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     
-    // Show limited pages: first 2, current, last 2
     const getPageNumbers = () => {
       const pages = [];
       if (totalPages <= 5) {
-        // Show all if 5 or less
         for (let i = 1; i <= totalPages; i++) pages.push(i);
       } else {
-        // Always show first 2
         pages.push(1, 2);
-        
-        // Show current page and neighbors
         const start = Math.max(3, currentPage - 1);
         const end = Math.min(totalPages - 2, currentPage + 1);
-        
-        if (start > 3) pages.push(-1); // Ellipsis
-        
+        if (start > 3) pages.push(-1);
         for (let i = start; i <= end; i++) pages.push(i);
-        
-        if (end < totalPages - 2) pages.push(-1); // Ellipsis
-        
-        // Always show last 2
+        if (end < totalPages - 2) pages.push(-1);
         pages.push(totalPages - 1, totalPages);
       }
       return pages;
@@ -235,7 +224,6 @@ function HomePage() {
                 {renderSection('Today', groupedArticles.today, 'text-blue-600')}
                 {renderSection('Yesterday', groupedArticles.yesterday, 'text-purple-600')}
                 {renderSection('This Week', groupedArticles.thisWeek, 'text-orange-600')}
-                {renderSection('Earlier', groupedArticles.earlier, 'text-zinc-600')}
                 {renderPagination()}
               </>
             ) : (
