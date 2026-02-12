@@ -186,18 +186,9 @@ export default function NewsCard({ article }) {
           </p>
 
           {/* Footer */}
-          <div className="pt-2 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-zinc-400">
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>{article.source}</span>
-            </div>
-            
-            <div className={`flex items-center gap-1 text-xs font-medium ${
-              saved ? 'text-yellow-500' : 'text-zinc-400'
-            }`}>
-              <Check className="w-3.5 h-3.5" />
-              <span>{saved ? 'Saved' : 'Unsaved'}</span>
-            </div>
+          <div className="pt-2 flex items-center gap-2 text-xs text-zinc-400">
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>{article.source}</span>
           </div>
         </CardContent>
       </Card>
