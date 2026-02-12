@@ -9,6 +9,25 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // Force reload when hash changes (after auth callback)
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#logged_in') {
+        window.location.reload()
+      }
+    }
+    
+    // Check on load
+    if (window.location.hash === '#logged_in') {
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
+    }
+    
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
   useEffect(() => {
     console.log('AuthContext: Initializing...')
     

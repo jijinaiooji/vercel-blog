@@ -1,39 +1,32 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Zap, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function AuthCallback() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [status, setStatus] = useState('Processing...')
+  const [status, setStatus] = useState('Confirming...')
   const [error, setError] = useState('')
 
   useEffect(() => {
-    async function handleCallback() {
-      const code = searchParams.get('code')
-      const error = searchParams.get('error')
+    const hash = window.location.hash
+    const error = new URLSearchParams(window.location.search).get('error')
 
-      if (error) {
-        setError(`Authentication failed: ${error}`)
-        return
-      }
-
-      if (!code) {
-        setError('No confirmation code received.')
-        return
-      }
-
-      // Small delay then redirect
-      setTimeout(() => {
-        router.push('/')
-      }, 1500)
+    if (error) {
+      setError(`Error: ${error}`)
+      return
     }
 
-    handleCallback()
-  }, [router, searchParams])
+    if (hash === '#logged_in') {
+      setStatus('Confirmed! Refreshing...')
+      // Small delay then reload
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-950">
@@ -54,9 +47,8 @@ export default function AuthCallback() {
           </div>
         ) : (
           <div className="text-white">
-            <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-400" />
-            <p className="text-lg font-medium">Account confirmed!</p>
-            <p className="text-sm text-zinc-400 mt-2">Redirecting...</p>
+            <div className="w-12 h-12 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-lg font-medium">{status}</p>
           </div>
         )}
       </div>
