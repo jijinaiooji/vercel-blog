@@ -65,7 +65,8 @@ export default function LoginPage() {
       const data = await res.json()
       
       if (res.ok) {
-        router.push('/')
+        // Force full page reload to pick up session
+        window.location.href = '/?logged_in=true'
       } else {
         setError(data.error || 'Login failed')
       }
