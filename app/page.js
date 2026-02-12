@@ -6,7 +6,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/NewsCard';
-import { Loader2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 const ITEMS_PER_PAGE = 12;
@@ -127,23 +127,20 @@ function HomePage() {
     if (totalPages <= 1) return null;
     
     return (
-      <div className="flex items-center justify-center gap-2 mt-10">
+      <div className="flex items-center justify-center gap-2 mt-10 flex-wrap">
+        {/* Previous */}
         <button
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage === 1}
-          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
-          <ChevronLeft className="w-4 h-4" />
+          Prev
         </button>
         
+        {/* Page numbers - show all */}
         <div className="flex items-center gap-1">
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum;
-            if (totalPages <= 5) pageNum = i + 1;
-            else if (currentPage <= 3) pageNum = i + 1;
-            else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-            else pageNum = currentPage - 2 + i;
-            
+          {Array.from({ length: totalPages }, (_, i) => {
+            const pageNum = i + 1;
             return (
               <button
                 key={pageNum}
@@ -160,12 +157,13 @@ function HomePage() {
           })}
         </div>
         
+        {/* Next */}
         <button
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50"
         >
-          <ChevronRight className="w-4 h-4" />
+          Next
         </button>
       </div>
     );
