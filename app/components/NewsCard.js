@@ -7,7 +7,7 @@ export default function NewsCard({ article }) {
     <article className={styles.card}>
       <div className={styles.header}>
         <span 
-          className={styles.source} 
+          className={styles.source}
           style={{ backgroundColor: article.sourceColor }}
         >
           {article.source}
