@@ -1,14 +1,18 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
-  title: 'My Blog',
-  description: 'A simple blog built with Next.js',
+  title: 'AI News - OpenClaw AI',
+  description: 'Latest artificial intelligence news, automated by OpenClaw AI',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
