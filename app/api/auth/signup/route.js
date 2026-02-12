@@ -18,7 +18,7 @@ export async function POST(request) {
       email,
       password,
       options: {
-        emailRedirectTo: 'https://vercel-blog-fjca7kc3a-jijinaios-projects.vercel.app/auth/callback',
+        emailRedirectTo: 'https://vercel-blog-jdtqe5oks-jijinaios-projects.vercel.app/auth/callback',
       },
     })
 
