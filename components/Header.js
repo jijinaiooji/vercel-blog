@@ -136,18 +136,11 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-2">
-            {/* Weather Display */}
-            {!weatherLoading && weather && weather.temp !== null ? (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400">
-                <span>{weather.emoji}</span>
-                <span className="font-medium">{weather.temp}°C</span>
-              </div>
-            ) : (
-              <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-400">
-                <span>🌤️</span>
-                <span>...</span>
-              </div>
-            )}
+            {/* Weather Display - Always show something */}
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400">
+              <span>{weather ? weather.emoji : '🌤️'}</span>
+              <span className="font-medium">{weather && weather.temp != null ? `${weather.temp}°C` : '...'}</span>
+            </div>
 
             {/* Theme Toggle - Desktop */}
             <button
@@ -201,17 +194,10 @@ export default function Header() {
             </nav>
 
             {/* Weather - Mobile */}
-            {!weatherLoading && weather && weather.temp !== null ? (
-              <div className="flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                <span>{weather.emoji}</span>
-                <span className="font-medium">{weather.temp}°C</span>
-              </div>
-            ) : weatherLoading && (
-              <div className="flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                <span>🌤️</span>
-                <span>...</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+              <span>{weather ? weather.emoji : '🌤️'}</span>
+              <span className="font-medium">{weather && weather.temp != null ? `${weather.temp}°C` : '...'}</span>
+            </div>
 
             {/* Theme Toggle - Mobile */}
             <button

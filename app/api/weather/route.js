@@ -1,4 +1,7 @@
 // Free weather API endpoints
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const WEATHER_APIS = [
   {
     name: 'Open-Meteo',
@@ -92,23 +95,24 @@ function getWeatherEmoji(code) {
 
 export async function GET(request) {
   try {
+    // Default fallback location (Paris)
+    const DEFAULT_LOC = { lat: 48.8566, lon: 2.3522 };
+    
     // Get user IP
     const headers = request.headers;
     const ip = headers.get('x-forwarded-for')?.split(',')[0] || 
                headers.get('x-real-ip') || 
-               '8.8.8.8'; // Default fallback
+               null;
     
     // Get location from IP
-    const location = await getLocationFromIP(ip);
+    let location = null;
+    if (ip) {
+      location = await getLocationFromIP(ip);
+    }
     
+    // Use default if IP lookup fails
     if (!location) {
-      return Response.json({ 
-        error: 'Could not determine location',
-        temp: null,
-        condition: 'Unknown',
-        emoji: '🌐',
-        source: 'default'
-      });
+      location = DEFAULT_LOC;
     }
     
     // Fetch weather
