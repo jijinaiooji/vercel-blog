@@ -39,16 +39,28 @@ export default function NewsCard({ article, onRead }) {
   const displayFullDate = rawDate ? formatDateFull(rawDate) : 'Today';
   
   const handleClick = () => {
-    if (onRead) {
-      onRead(article);
-    }
+    if (onRead) onRead(article);
   };
 
   return (
     <Card 
-      className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden"
       onClick={handleClick}
     >
+      {/* Image */}
+      {article.image && (
+        <div className="relative h-40 bg-zinc-100 dark:bg-zinc-800">
+          <img 
+            src={article.image} 
+            alt={article.title}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.parentElement.style.display = 'none';
+            }}
+          />
+        </div>
+      )}
+      
       <CardContent className="p-5 space-y-4">
         {/* Header: Source badge and date */}
         <div className="flex items-center justify-between gap-3">
@@ -66,12 +78,12 @@ export default function NewsCard({ article, onRead }) {
         </div>
 
         {/* Title */}
-        <h3 className="font-semibold text-zinc-900 dark:text-white leading-snug text-lg line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <h3 className="font-semibold text-zinc-900 dark:text-white leading-snug text-lg line-clamp-2">
           {article.title}
         </h3>
         
         {/* Description */}
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-3">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed line-clamp-2">
           {article.description}
         </p>
 
