@@ -192,12 +192,12 @@ export default function NewsCard({ article }) {
               <span>{article.source}</span>
             </div>
             
-            {saved && (
-              <div className="flex items-center gap-1 text-xs text-yellow-500">
-                <Check className="w-3.5 h-3.5" />
-                <span>Saved</span>
-              </div>
-            )}
+            <div className={`flex items-center gap-1 text-xs font-medium ${
+              saved ? 'text-yellow-500' : 'text-zinc-400'
+            }`}>
+              <Check className="w-3.5 h-3.5" />
+              <span>{saved ? 'Saved' : 'Unsaved'}</span>
+            </div>
           </div>
         </CardContent>
       </Card>
