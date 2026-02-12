@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/NewsCard';
+import ArticleDrawer from '@/components/ArticleDrawer';
 import { Loader2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 9;
@@ -14,6 +15,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalArticles, setTotalArticles] = useState(0);
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
   // Force refresh after auth callback
   useEffect(() => {
@@ -79,6 +81,14 @@ export default function Home() {
     setSearchQuery('');
   };
 
+  const openArticle = (article) => {
+    setSelectedArticle(article);
+  };
+
+  const closeArticle = () => {
+    setSelectedArticle(null);
+  };
+
   return (
     <>
       <Header />
@@ -134,7 +144,7 @@ export default function Home() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {paginatedArticles.map((article, index) => (
-                    <NewsCard key={index} article={article} />
+                    <NewsCard key={index} article={article} onRead={() => openArticle(article)} />
                   ))}
                 </div>
 
@@ -199,6 +209,9 @@ export default function Home() {
       </main>
       
       <Footer />
+      
+      {/* Article Drawer */}
+      <ArticleDrawer article={selectedArticle} onClose={closeArticle} />
     </>
   );
 }
