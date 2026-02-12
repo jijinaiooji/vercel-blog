@@ -8,47 +8,56 @@ export async function GET(request) {
     return Response.json({ error: 'URL required' }, { status: 400 })
   }
 
-  let articleUrl = url
-  if (!articleUrl.startsWith('http')) {
-    articleUrl = 'https://' + articleUrl
-  }
+  let articleUrl = url.startsWith('http') ? url : 'https://' + url
 
   try {
-    const response = await fetch(articleUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
-      },
-      signal: AbortSignal.timeout(8000)
+    const res = await fetch(articleUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(5000)
     })
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch')
-    }
+    if (!res.ok) throw new Error('Failed')
 
-    const html = await response.text()
+    const html = await res.text()
 
+    // Get title
     const titleMatch = html.match(/<title>([^<]+)<\/title>/i)
-    let title = titleMatch ? titleMatch[1].replace(/\|.*$/, '').trim() : 'Untitled'
+    const title = titleMatch ? titleMatch[1].split('|')[0].split('-')[0].trim() : 'Article'
 
-    let author = ''
+    // Get author
     const authorMatch = html.match(/<meta[^>]*name="author"[^>]*content="([^"]*)"/i)
-    if (authorMatch) author = authorMatch[1].trim()
+    const author = authorMatch ? authorMatch[1] : ''
 
-    let date = ''
+    // Get date
     const dateMatch = html.match(/<meta[^>]*property="article:published_time"[^>]*content="([^"]*)"/i)
+    let date = ''
     if (dateMatch) {
-      try {
-        date = new Date(dateMatch[1]).toLocaleDateString('en-GB')
-      } catch (e) {}
+      try { date = new Date(dateMatch[1]).toLocaleDateString() } catch (e) {}
     }
 
-    let text = html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-      .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
-      .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-      .replace(/<!--[\s\S]*?-->/g, '')
+    // Get main content - keep paragraphs
+    let content = html
+    content = content.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    content = content.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    content = content.replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+    content = content.replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+    content = content.replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+    content = content.replace(/<!--[\s\S]*?-->/g, '')
+    
+    // Find article or main tag
+    const articleTag = content.match(/<article[^>]*>([\s\S]*?)<\/article>/i)
+    const mainTag = content.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
+    content = articleTag ? articleTag[1] : (mainTag ? mainTag[1] : content)
+
+    // Convert to readable text
+    content = content
+      .replace(/<h[1-6][^>]*>/gi, '\n\n### ')
+      .replace(/<\/h[1-6]>/gi, '\n\n')
+      .replace(/<p[^>]*>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<li[^>]*>/gi, '\n• ')
+      .replace(/<\/li>/gi, '\n')
       .replace(/<[^>]+>/g, ' ')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
@@ -58,38 +67,23 @@ export async function GET(request) {
       .replace(/\s+/g, ' ')
       .trim()
 
-    const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i) ||
-                        html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
-    if (articleMatch) {
-      let content = articleMatch[1]
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-        .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-        .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
-        .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/\s+/g, ' ')
-        .trim()
-      text = content
+    // Clean up
+    content = content.replace(/###\s+/g, '### ')
+    content = content.replace(/\n\s*\n\s*/g, '\n\n')
+    content = content.trim()
+
+    // Truncate if too long
+    if (content.length > 8000) {
+      content = content.substring(0, 8000) + '\n\n...'
     }
 
-    if (text.length > 10000) {
-      text = text.substring(0, 10000) + '...'
-    }
+    return Response.json({ title, content, author, date, url: articleUrl })
 
-    return Response.json({ title, content: text, author, date, url: articleUrl })
-
-  } catch (error) {
-    console.error('Article fetch error:', error)
+  } catch (err) {
+    console.error('Article error:', err)
     return Response.json({
-      title: 'Article',
-      content: 'Unable to load article content. Please visit the original site.',
+      title: 'Unable to Load',
+      content: 'Could not load this article. Please visit the original site to read it.',
       author: '',
       date: '',
       url: articleUrl,
