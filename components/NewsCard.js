@@ -109,6 +109,8 @@ export default function NewsCard({ article }) {
     }
   };
 
+  const hasImage = !!article.image;
+
   return (
     <a 
       href={articleUrl || '#'}
@@ -116,10 +118,10 @@ export default function NewsCard({ article }) {
       rel="noopener noreferrer"
       className="block h-full"
     >
-      <Card className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 overflow-hidden group">
+      <Card className="h-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 overflow-hidden group relative">
         
-        {/* Image */}
-        {article.image && (
+        {/* Image (if available) */}
+        {hasImage && (
           <div className="relative h-40 bg-zinc-100 dark:bg-zinc-800">
             <img 
               src={article.image} 
@@ -127,30 +129,39 @@ export default function NewsCard({ article }) {
               className="w-full h-full object-cover"
               onError={(e) => e.target.parentElement.style.display = 'none'}
             />
-            {/* Save Button Overlay */}
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className={`absolute top-3 right-3 p-2 rounded-full transition-all ${
-                saved 
-                  ? 'bg-yellow-500 text-white' 
-                  : 'bg-white/90 dark:bg-zinc-900/90 text-zinc-600 dark:text-zinc-400 hover:bg-yellow-500 hover:text-white'
-              }`}
-            >
-              {saving ? (
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              ) : saved ? (
-                <Bookmark className="w-4 h-4 fill-current" />
-              ) : (
-                <Bookmark className="w-4 h-4" />
-              )}
-            </button>
           </div>
         )}
         
+        {/* Save Button - Always Visible */}
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className={`absolute z-10 p-2 rounded-full transition-all ${
+            hasImage 
+              ? 'top-3 right-3' 
+              : 'top-3 right-3'
+          } ${
+            saved 
+              ? 'bg-yellow-500 text-white' 
+              : 'bg-white/90 dark:bg-zinc-900/90 text-zinc-600 dark:text-zinc-400 hover:bg-yellow-500 hover:text-white shadow-md'
+          }`}
+          onClickCapture={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
+          {saving ? (
+            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          ) : saved ? (
+            <Bookmark className="w-4 h-4 fill-current" />
+          ) : (
+            <Bookmark className="w-4 h-4" />
+          )}
+        </button>
+        
         <CardContent className="p-5 space-y-4">
           {/* Header: Source badge and date */}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 pr-10">
             <Badge 
               style={{ backgroundColor: article.sourceColor }}
               className="text-white text-xs font-medium"
@@ -178,7 +189,7 @@ export default function NewsCard({ article }) {
           <div className="pt-2 flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-zinc-400">
               <ExternalLink className="w-3.5 h-3.5" />
-              <span>Read on {article.source}</span>
+              <span>{article.source}</span>
             </div>
             
             {saved && (
