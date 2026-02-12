@@ -13,7 +13,7 @@ export async function GET(request) {
   try {
     const supabase = createClient()
     
-    // Exchange code for session - this sets cookies automatically
+    // Exchange code for session - this sets HTTP-only cookies
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (error) {
@@ -21,8 +21,8 @@ export async function GET(request) {
       return NextResponse.redirect(`${origin}/login?error=auth_error`)
     }
 
-    // Success - force full page reload by redirecting with a hash that triggers reload
-    return NextResponse.redirect(`${origin}${next}#logged_in`)
+    // Success - redirect to callback page for reload
+    return NextResponse.redirect(`${origin}/auth/callback`)
   } catch (err) {
     console.error('Auth exception:', err)
     return NextResponse.redirect(`${origin}/login?error=unknown_error`)
