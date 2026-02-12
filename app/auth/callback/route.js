@@ -13,25 +13,23 @@ export async function GET(request) {
   try {
     const supabase = createClient()
     
-    // Set the session with the code
-    const { data, error } = await supabase.auth.setSession({
-      exchange_code: code,
-    })
+    // Get the current session first
+    const { data: { session }, error: getError } = await supabase.auth.getSession()
+
+    if (getError) {
+      console.error('Get session error:', getError)
+    }
+
+    // Exchange code for session
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (error) {
-      console.error('Auth callback error:', error)
+      console.error('Exchange code error:', error)
       return NextResponse.redirect(`${origin}/login?error=auth_error`)
     }
 
-    // Verify session was set
-    const { data: { session } } = await supabase.auth.getSession()
-    
-    if (session) {
-      // Success - redirect to home
-      return NextResponse.redirect(`${origin}/?auth_success=true`)
-    } else {
-      return NextResponse.redirect(`${origin}/login?error=no_session`)
-    }
+    // Success - redirect to home
+    return NextResponse.redirect(`${origin}/?confirmed=true`)
   } catch (err) {
     console.error('Auth callback exception:', err)
     return NextResponse.redirect(`${origin}/login?error=unknown_error`)
