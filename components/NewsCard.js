@@ -3,8 +3,17 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Bookmark, Share2, Twitter, Facebook, Linkedin, Mastodon } from 'lucide-react';
+import { ExternalLink, Bookmark, Share2, Twitter, Facebook, Linkedin } from 'lucide-react';
 import { createBrowserClient } from '@supabase/ssr';
+
+// Simple Mastodon SVG icon
+function MastodonIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M23.268 5.313c-.35-2.578-2.617-4.61-5.304-5.004C17.51.242 15.792 0 11.813 0h-.03c-3.98 0-4.835.242-6.151.309C3.355.703.903 2.734.553 5.312c-.143.992-.118 2.012.046 2.987-.126.563-.196 1.17-.196 1.79 0 3.41 2.575 6.286 6.326 6.286 2.857 0 5.373-1.556 6.26-3.906.34.118.686.196 1.05.196 2.38 0 4.566-1.93 4.566-4.437 0-1.08-.38-2.06-1.005-2.837.26-.58.405-1.216.405-1.893 0-1.33-.566-2.494-1.425-3.315zm-6.292 14.83H9.808v-8.088c-1.45-1.734-3.635-2.51-5.254-2.51-1.597 0-3.178.776-3.635 2.292-.69 2.28-.27 4.633 1.054 5.992v1.378c0 .656.03 1.268.09 1.932h3.953v-.378c-.54-.69-.81-1.487-.81-2.366 0-1.78 1.18-2.688 2.95-2.688 1.78 0 2.94.908 2.94 2.688 0 .878-.27 1.675-.81 2.366v.378h3.79l-.04-1.84zm8.07-10.97c-.55.55-1.37.78-2.45.78-1.05 0-1.94-.24-2.45-.75-.55-.55-.78-1.37-.78-2.45 0-1.08.23-1.94.75-2.45.55-.55 1.4-.78 2.45-.78 1.08 0 1.94.23 2.5.75.55.51.78 1.37.78 2.45 0 1.08-.23 1.94-.78 2.45z"/>
+    </svg>
+  );
+}
 
 function formatTwitterDate(dateStr) {
   if (!dateStr) return 'Just now';
@@ -195,7 +204,7 @@ export default function NewsCard({ article }) {
                 <Linkedin className="w-4 h-4" />
               </button>
               <button onClick={shareMastodon} className="p-2 rounded-full bg-white dark:bg-zinc-900 shadow-md text-purple-600 hover:bg-purple-50">
-                <Mastodon className="w-4 h-4" />
+                <MastodonIcon className="w-4 h-4" />
               </button>
             </div>
           )}
