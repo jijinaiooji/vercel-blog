@@ -278,6 +278,36 @@ export default function Header() {
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 {isDark ? 'Light Mode' : 'Dark Mode'}
               </button>
+
+              {/* User - Mobile */}
+              {!authLoading && (
+                user ? (
+                  <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-zinc-400" />
+                      <span className="text-sm text-zinc-600 dark:text-zinc-400 truncate max-w-[150px]">
+                        {user.email}
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 text-sm hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-sm font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                )
+              )}
             </div>
           )}
         </div>
