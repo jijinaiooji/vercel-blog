@@ -44,13 +44,18 @@ const techStack = [
   { name: 'OpenClaw', desc: 'AI-powered automation' },
   { name: 'Telegram', desc: 'Human-AI interface' },
   { name: 'RSS Feeds', desc: 'AI news aggregation' },
+  { name: 'Supabase', desc: 'User authentication' },
+  { name: 'Open-Meteo', desc: 'Free weather API' },
 ];
 
 const features = [
-  { title: 'Zero manual deployment', desc: 'Push to GitHub triggers Vercel' },
+  { title: 'User accounts', desc: 'Sign up/login with Supabase auth' },
+  { title: 'Weather by IP', desc: 'Local weather from your IP' },
+  { title: 'Dark/Light theme', desc: 'Persistent theme preference' },
+  { title: 'Search & filter', desc: 'Find articles instantly' },
   { title: 'Auto-updating news', desc: 'RSS feeds refresh every 12 hours' },
+  { title: 'Zero manual deployment', desc: 'Push to GitHub triggers Vercel' },
   { title: 'Serverless API', desc: 'News fetched on-demand, cached at edge' },
-  { title: 'Analytics built-in', desc: 'Vercel Analytics track visitors' },
   { title: 'Fully open-source', desc: 'Code on GitHub, free to fork' },
 ];
 
