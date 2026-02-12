@@ -29,9 +29,10 @@ function formatDateFull(dateStr) {
 }
 
 export default function NewsCard({ article }) {
-  // Use formatted fields if available, otherwise format on the fly
-  const displayDate = article.date || formatTwitterDate(article.pubDate);
-  const displayFullDate = article.formattedDate || formatDateFull(article.pubDate);
+  // Handle different date formats from API
+  const dateValue = article.pubDate || article.date || article.isoDate;
+  const displayDate = article.date || (dateValue ? formatTwitterDate(dateValue) : 'Just now');
+  const displayFullDate = article.formattedDate || (dateValue ? formatDateFull(dateValue) : 'Today');
   
   return (
     <Card className="h-full group bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300">
